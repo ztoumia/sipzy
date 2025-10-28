@@ -1,7 +1,7 @@
 # ========================================
 # Stage 1: Build Stage
 # ========================================
-FROM gradle:8.5-jdk17-alpine AS builder
+FROM gradle:8.5-jdk21-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -24,7 +24,7 @@ RUN gradle clean build -x test --no-daemon
 # ========================================
 # Stage 2: Runtime Stage
 # ========================================
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 # Install curl for healthcheck
 RUN apk add --no-cache curl

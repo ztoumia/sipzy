@@ -26,6 +26,11 @@ spring:
           batch_size: 20
         order_inserts: true
         order_updates: true
+        # Fix for bytea issue with Hibernate 6.x and PostgreSQL
+        type:
+          preferred_uuid_jdbc_type: VARCHAR
+          preferred_instant_jdbc_type: TIMESTAMP
+        jdbc_type_contributor: org.hibernate.type.SqlTypes
 
   # Flyway Migration
   flyway:
