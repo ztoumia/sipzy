@@ -1,0 +1,177 @@
+version: '3.8'
+
+# ========================================
+# Networks - Shared network for all services
+# ========================================
+networks:
+  sipzy-network:
+    driver: bridge
+    name: sipzy-network
+
+# ========================================
+# Volumes - Persistent data storage
+# ========================================
+volumes:
+  postgres-data:
+    name: sipzy-postgres-data
+  backend-logs:
+    name: sipzy-backend-logs
+
+# ========================================
+# Services
+# ========================================
+services:
+  # ========================================
+  # PostgreSQL Database
+  # ========================================
+  db:
+    image: postgres:15-alpine
+    container_name: sipzy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sipzy}
+      POSTGRES_USER: ${POSTGRES_USER:-sipzy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sipzy123}
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=en_US.UTF-8"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - sipzy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sipzy} -d ${POSTGRES_DB:-sipzy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "effective_cache_size=1GB"
+
+  # ========================================
+  # Backend (Spring Boot)
+  # ========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - GRADLE_BUILD_ARGS=--no-daemon
+    image: ${DOCKER_REGISTRY:-ztoumia}/sipzy-backend:${BACKEND_VERSION:-latest}
+    container_name: sipzy-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Database Configuration
+      DATABASE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-sipzy}
+      DATABASE_USERNAME: ${POSTGRES_USER:-sipzy}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-sipzy123}
+
+      # Spring Profile
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILE:-dev}
+
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-changeme-this-is-a-secret-key-for-jwt-token-generation-min-256-bits}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-604800000}
+
+      # Cloudinary Configuration (Optional)
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+
+      # Email Configuration (Optional)
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH:-false}
+      MAIL_SMTP_STARTTLS: ${MAIL_SMTP_STARTTLS:-false}
+
+      # JVM Options
+      JAVA_OPTS: ${JAVA_OPTS:--Xms256m -Xmx512m}
+
+      # Server Configuration
+      SERVER_PORT: 8080
+
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
+    volumes:
+      - backend-logs:/app/logs
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    networks:
+      - sipzy-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ========================================
+  # Frontend (Next.js)
+  # ========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+    image: ${DOCKER_REGISTRY:-ztoumia}/sipzy-frontend:${FRONTEND_VERSION:-latest}
+    container_name: sipzy-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      # API Configuration
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8080}
+
+      # Node Environment
+      NODE_ENV: production
+
+      # Next.js Configuration
+      NEXT_TELEMETRY_DISABLED: 1
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - sipzy-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ========================================
+  # pgAdmin (Optional - Development only)
+  # ========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sipzy-pgadmin
+    restart: unless-stopped
+    profiles:
+      - dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@sipzy.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - sipzy-network
+    depends_on:
+      - db
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin

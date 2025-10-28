@@ -50,6 +50,11 @@ frontend/yarn-error.log*
 *.sqlite
 *.sqlite3
 postgres-data/
+pgadmin-data/
+
+# Docker
+*.sql
+backup_*.sql
 
 # Logs
 logs/
