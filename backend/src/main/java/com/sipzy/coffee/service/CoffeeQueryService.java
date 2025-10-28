@@ -36,15 +36,17 @@ public class CoffeeQueryService {
     public PageResponse<CoffeeResponse> getAllCoffees(CoffeeFiltersRequest filters, int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit);
 
+        // Convert null to empty string to avoid PostgreSQL bytea type inference issues
+        String search = filters.getSearch() != null ? filters.getSearch() : "";
         String origin = (filters.getOrigin() != null && !filters.getOrigin().isEmpty())
-            ? filters.getOrigin().get(0) : null;
+            ? filters.getOrigin().get(0) : "";
         Long roasterId = (filters.getRoasterId() != null && !filters.getRoasterId().isEmpty())
             ? filters.getRoasterId().get(0) : null;
         BigDecimal minRating = filters.getMinRating() != null
             ? BigDecimal.valueOf(filters.getMinRating()) : null;
 
         Page<Coffee> coffeePage = coffeeRepository.searchWithFilters(
-            filters.getSearch(),
+            search,
             origin,
             roasterId,
             minRating,

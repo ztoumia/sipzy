@@ -35,8 +35,8 @@ public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
     @Query("SELECT DISTINCT c FROM Coffee c " +
            "LEFT JOIN c.notes n " +
            "WHERE c.status = 'APPROVED' " +
-           "AND (:search IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-           "AND (:origin IS NULL OR c.origin = :origin) " +
+           "AND (:search = '' OR LOWER(c.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+           "AND (:origin = '' OR c.origin = :origin) " +
            "AND (:roasterId IS NULL OR c.roaster.id = :roasterId) " +
            "AND (:minRating IS NULL OR c.averageRating >= :minRating) " +
            "AND (:noteIds IS NULL OR n.id IN :noteIds)")

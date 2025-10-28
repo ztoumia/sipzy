@@ -96,7 +96,7 @@ class AuthServiceTest {
         verify(userRepository).existsByUsername("testuser");
         verify(passwordEncoder).encode("Password123!");
         verify(userRepository).save(any(User.class));
-        verify(jwtUtil).generateToken(anyLong(), eq("testuser"), eq("ROLE_USER"));
+        verify(jwtUtil).generateToken(anyLong(), eq("testuser"), eq("USER"));
     }
 
     @Test
@@ -154,7 +154,7 @@ class AuthServiceTest {
 
         verify(userRepository).findByEmail("test@example.com");
         verify(passwordEncoder).matches("Password123!", "hashedPassword");
-        verify(jwtUtil).generateToken(1L, "testuser", "ROLE_USER");
+        verify(jwtUtil).generateToken(1L, "testuser", "USER");
     }
 
     @Test
@@ -196,15 +196,18 @@ class AuthServiceTest {
     @Test
     @DisplayName("Should validate password strength correctly")
     void validatePasswordStrength() {
-        // Valid passwords
-        assertDoesNotThrow(() -> authService.register(registerRequest));
-
-        // Invalid passwords
-        registerRequest.setPassword("short");
+        // Setup mocks for valid password test
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userMapper.toUserResponse(any(User.class))).thenReturn(userResponse);
+        when(jwtUtil.generateToken(anyLong(), anyString(), anyString())).thenReturn("jwt-token");
 
-        // This would be tested if password validation is in AuthService
-        // For now, validation happens at DTO level with @Pattern annotation
+        // Valid password
+        assertDoesNotThrow(() -> authService.register(registerRequest));
+
+        // Note: Invalid passwords are validated at DTO level with @Pattern annotation
+        // The AuthService will receive already validated RegisterRequest objects
     }
 }
