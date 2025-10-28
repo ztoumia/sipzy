@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "name": "La Cabra",
+    "country": "Denmark",
+    "website": "https://lacabra.dk",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "Danish specialty coffee roastery focused on light roasts and unique processing methods.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "The Barn",
+    "country": "Germany",
+    "website": "https://thebarn.de",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "Berlin-based roastery known for their exceptional single-origin coffees and innovative roasting techniques.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Square Mile",
+    "country": "UK",
+    "website": "https://shop.squaremilecoffee.com",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "London's pioneering specialty coffee roastery, co-founded by James Hoffmann.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Heart Coffee",
+    "country": "USA",
+    "website": "https://www.heartroasters.com",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "Portland-based roastery specializing in light-roasted, single-origin coffees.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "Tim Wendelboe",
+    "country": "Norway",
+    "website": "https://www.timwendelboe.no",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "World-renowned Norwegian roastery and café, multiple World Barista Champion.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 6,
+    "name": "Blue Bottle Coffee",
+    "country": "USA",
+    "website": "https://bluebottlecoffee.com",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "California-based specialty coffee company known for their meticulous approach to coffee.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 7,
+    "name": "Onyx Coffee Lab",
+    "country": "USA",
+    "website": "https://onyxcoffeelab.com",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "Arkansas-based roastery pushing the boundaries of coffee quality and innovation.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": 8,
+    "name": "Sey Coffee",
+    "country": "USA",
+    "website": "https://seycoffee.com",
+    "logoUrl": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&h=200&fit=crop&crop=center",
+    "description": "Brooklyn-based roastery focused on exceptional single-origin coffees and sustainable practices.",
+    "isVerified": true,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  }
+]

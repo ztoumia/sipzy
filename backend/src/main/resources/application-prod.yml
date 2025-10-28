@@ -1,0 +1,34 @@
+# Configuration pour l'environnement de production
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+# Sécurité maximale en production
+logging:
+  level:
+    com.sipzy: INFO
+    org.springframework: WARN
+
+# Swagger UI désactivé en production (ou sécurisé)
+springdoc:
+  swagger-ui:
+    enabled: false
+
+# JWT secret depuis variable d'environnement
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 604800000
+
+# Cloudinary depuis variables d'environnement
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

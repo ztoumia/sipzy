@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://sipzy.coffee/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /api/
+
+# Allow all other content
+Allow: /coffees/
+Allow: /profile/
+Allow: /auth/
+
+# Crawl delay (optional)
+Crawl-delay: 1

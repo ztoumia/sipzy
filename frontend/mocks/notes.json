@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "name": "Citrus",
+    "category": "Fruity",
+    "description": "Bright, tangy citrus notes like lemon, orange, or grapefruit"
+  },
+  {
+    "id": 2,
+    "name": "Lemon",
+    "category": "Fruity",
+    "description": "Fresh, zesty lemon flavor"
+  },
+  {
+    "id": 3,
+    "name": "Orange",
+    "category": "Fruity",
+    "description": "Sweet, juicy orange notes"
+  },
+  {
+    "id": 4,
+    "name": "Berry",
+    "category": "Fruity",
+    "description": "Sweet berry flavors like strawberry, blueberry, or raspberry"
+  },
+  {
+    "id": 5,
+    "name": "Strawberry",
+    "category": "Fruity",
+    "description": "Sweet, ripe strawberry notes"
+  },
+  {
+    "id": 6,
+    "name": "Blueberry",
+    "category": "Fruity",
+    "description": "Rich, sweet blueberry flavor"
+  },
+  {
+    "id": 7,
+    "name": "Stone Fruit",
+    "category": "Fruity",
+    "description": "Peach, apricot, or plum-like flavors"
+  },
+  {
+    "id": 8,
+    "name": "Apple",
+    "category": "Fruity",
+    "description": "Fresh, crisp apple notes"
+  },
+  {
+    "id": 9,
+    "name": "Chocolate",
+    "category": "Chocolatey",
+    "description": "Rich, smooth chocolate flavor"
+  },
+  {
+    "id": 10,
+    "name": "Dark Chocolate",
+    "category": "Chocolatey",
+    "description": "Intense, bittersweet dark chocolate notes"
+  },
+  {
+    "id": 11,
+    "name": "Cocoa",
+    "category": "Chocolatey",
+    "description": "Pure cocoa powder flavor"
+  },
+  {
+    "id": 12,
+    "name": "Caramel",
+    "category": "Sweet",
+    "description": "Sweet, buttery caramel notes"
+  },
+  {
+    "id": 13,
+    "name": "Honey",
+    "category": "Sweet",
+    "description": "Natural, floral honey sweetness"
+  },
+  {
+    "id": 14,
+    "name": "Brown Sugar",
+    "category": "Sweet",
+    "description": "Rich, molasses-like sweetness"
+  },
+  {
+    "id": 15,
+    "name": "Vanilla",
+    "category": "Sweet",
+    "description": "Creamy, smooth vanilla notes"
+  },
+  {
+    "id": 16,
+    "name": "Nutty",
+    "category": "Nutty",
+    "description": "General nutty characteristics"
+  },
+  {
+    "id": 17,
+    "name": "Almond",
+    "category": "Nutty",
+    "description": "Sweet, mild almond flavor"
+  },
+  {
+    "id": 18,
+    "name": "Hazelnut",
+    "category": "Nutty",
+    "description": "Rich, roasted hazelnut notes"
+  },
+  {
+    "id": 19,
+    "name": "Floral",
+    "category": "Floral",
+    "description": "Delicate floral aromas"
+  },
+  {
+    "id": 20,
+    "name": "Jasmine",
+    "category": "Floral",
+    "description": "Fragrant jasmine flower notes"
+  },
+  {
+    "id": 21,
+    "name": "Rose",
+    "category": "Floral",
+    "description": "Elegant rose petal aromas"
+  },
+  {
+    "id": 22,
+    "name": "Earthy",
+    "category": "Earthy",
+    "description": "Ground, soil-like characteristics"
+  },
+  {
+    "id": 23,
+    "name": "Woody",
+    "category": "Earthy",
+    "description": "Wood-like, forest floor notes"
+  },
+  {
+    "id": 24,
+    "name": "Herbal",
+    "category": "Earthy",
+    "description": "Fresh herb characteristics"
+  },
+  {
+    "id": 25,
+    "name": "Spicy",
+    "category": "Spicy",
+    "description": "Warm spice notes"
+  },
+  {
+    "id": 26,
+    "name": "Cinnamon",
+    "category": "Spicy",
+    "description": "Warm, sweet cinnamon spice"
+  },
+  {
+    "id": 27,
+    "name": "Wine-like",
+    "category": "Other",
+    "description": "Complex, wine-like characteristics"
+  },
+  {
+    "id": 28,
+    "name": "Creamy",
+    "category": "Other",
+    "description": "Smooth, creamy mouthfeel"
+  },
+  {
+    "id": 29,
+    "name": "Buttery",
+    "category": "Other",
+    "description": "Rich, buttery texture and flavor"
+  },
+  {
+    "id": 30,
+    "name": "Smoky",
+    "category": "Other",
+    "description": "Smoky, roasted characteristics"
+  }
+]

@@ -1,0 +1,23 @@
+# Configuration pour l'environnement de développement
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sipzy_db
+    username: sipzy_user
+    password: sipzy_dev_password
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Désactiver la sécurité en mode dev (optionnel)
+logging:
+  level:
+    com.sipzy: DEBUG
+    org.springframework: DEBUG
+
+# Swagger UI activé en dev
+springdoc:
+  swagger-ui:
+    enabled: true
