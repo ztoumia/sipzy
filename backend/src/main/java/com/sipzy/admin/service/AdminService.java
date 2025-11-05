@@ -1,10 +1,14 @@
 package com.sipzy.admin.service;
 
+import com.sipzy.admin.domain.Activity;
 import com.sipzy.admin.domain.Report;
 import com.sipzy.admin.domain.ReportStatus;
+import com.sipzy.admin.dto.response.ActivityResponse;
 import com.sipzy.admin.dto.response.AdminStatsResponse;
 import com.sipzy.admin.dto.response.ReportResponse;
+import com.sipzy.admin.mapper.ActivityMapper;
 import com.sipzy.admin.mapper.ReportMapper;
+import com.sipzy.admin.repository.ActivityRepository;
 import com.sipzy.admin.repository.ReportRepository;
 import com.sipzy.coffee.domain.Coffee;
 import com.sipzy.coffee.domain.CoffeeStatus;
@@ -44,10 +48,12 @@ public class AdminService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final ReportRepository reportRepository;
+    private final ActivityRepository activityRepository;
     private final CoffeeCommandService coffeeCommandService;
     private final CoffeeMapper coffeeMapper;
     private final UserMapper userMapper;
     private final ReportMapper reportMapper;
+    private final ActivityMapper activityMapper;
 
     public AdminStatsResponse getStats() {
         log.info("Getting admin stats");
@@ -297,6 +303,22 @@ public class AdminService {
 
         log.info("Report dismissed successfully: {}", reportId);
         return reportMapper.toReportResponse(report);
+    }
+
+    // ==================== Activity Log ====================
+
+    /**
+     * Get recent admin activities
+     */
+    public List<ActivityResponse> getRecentActivity(int limit) {
+        log.info("Getting recent activities - limit: {}", limit);
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<Activity> activities = activityRepository.findAllByOrderByCreatedAtDesc(pageable);
+
+        return activities.stream()
+                .map(activityMapper::toActivityResponse)
+                .collect(Collectors.toList());
     }
 
 }

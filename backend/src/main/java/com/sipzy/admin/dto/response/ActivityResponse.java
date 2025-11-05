@@ -1,5 +1,8 @@
 package com.sipzy.admin.dto.response;
 
+import com.sipzy.coffee.dto.response.CoffeeResponse;
+import com.sipzy.user.dto.response.UserResponse;
+
 import java.time.Instant;
 
 /**
@@ -8,11 +11,9 @@ import java.time.Instant;
  */
 public record ActivityResponse(
         Long id,
-        String type, // COFFEE_APPROVED, COFFEE_REJECTED, USER_BANNED, REPORT_RESOLVED, etc.
+        String type,
         String message,
-        Long performedById,
-        String performedByUsername,
-        Long entityId,
-        String entityType,
-        Instant timestamp
+        Instant timestamp,
+        UserResponse user,
+        CoffeeResponse coffee
 ) {}

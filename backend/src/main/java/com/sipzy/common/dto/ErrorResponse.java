@@ -20,6 +20,9 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
 
+    @Builder.Default
+    private Boolean success = false;
+
     private Integer status;
     private String error;
     private String message;

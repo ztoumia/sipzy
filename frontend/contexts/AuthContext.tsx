@@ -1,8 +1,23 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authApi } from '@/lib/api/mockApi';
-import { User } from '@/types';
+import api from '@/lib/api/realApi';
+import { setAuthToken, removeAuthToken, getErrorMessage } from '@/lib/api/apiClient';
+import type { UserResponse } from '@/lib/types/api';
+
+// Map UserResponse to frontend User type
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  avatarUrl?: string;
+  bio?: string;
+  isActive: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface RegisterData {
   username: string;
@@ -30,25 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('auth_token');
+        const token = localStorage.getItem('authToken');
         if (token) {
-          const verifiedUser = await authApi.verifyToken(token);
-          if (verifiedUser) {
-            setUser(verifiedUser);
-            // S'assurer que le cookie est aussi défini
-            document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
-          } else {
-            // Token invalide, nettoyer le localStorage et cookie
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user');
-            document.cookie = 'auth_token=; path=/; max-age=0';
-          }
+          const verifiedUser = await api.auth.verifyToken();
+          setUser(verifiedUser);
+          // S'assurer que le cookie est aussi défini
+          document.cookie = `authToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
         }
       } catch (error) {
         console.error('Error verifying token:', error);
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-        document.cookie = 'auth_token=; path=/; max-age=0';
+        removeAuthToken();
+        document.cookie = 'authToken=; path=/; max-age=0';
       } finally {
         setIsLoading(false);
       }
@@ -59,19 +66,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const result = await authApi.login(email, password);
-      if (result) {
-        setUser(result.user);
-        localStorage.setItem('auth_token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+      const result = await api.auth.login({ email, password });
+      setUser(result.user);
+      setAuthToken(result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
 
-        // Stocker aussi dans un cookie pour le middleware
-        document.cookie = `auth_token=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
-      } else {
-        throw new Error('Email ou mot de passe incorrect');
-      }
+      // Stocker aussi dans un cookie pour le middleware
+      document.cookie = `authToken=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
     } catch (error) {
-      throw error;
+      const message = getErrorMessage(error);
+      throw new Error(message);
     }
   };
 

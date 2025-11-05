@@ -61,6 +61,10 @@ public class SecurityConfig {
                         // Public READ endpoints - Coffees
                         .requestMatchers(HttpMethod.GET, "/api/coffees/**").permitAll()
 
+                        // Public READ endpoints - Roasters and Notes
+                        .requestMatchers(HttpMethod.GET, "/api/roasters/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/notes/**").permitAll()
+
                         // Public READ endpoints - Reviews
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/coffees/*/reviews").permitAll()

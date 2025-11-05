@@ -1,6 +1,7 @@
 package com.sipzy.admin.controller;
 
 import com.sipzy.admin.dto.request.ModerateCoffeeRequest;
+import com.sipzy.admin.dto.response.ActivityResponse;
 import com.sipzy.admin.dto.response.AdminStatsResponse;
 import com.sipzy.admin.dto.request.BanUserRequest;
 import com.sipzy.admin.dto.request.ModerateReportRequest;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller pour l'administration (réservé aux ADMIN)
@@ -200,6 +203,20 @@ public class AdminController {
 
         Long adminId = jwtUtil.extractUserIdFromHeader(authHeader);
         ReportResponse response = adminService.dismissReport(id, adminId, request.getAdminNotes());
+
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    // ==================== Activity Log ====================
+
+    @GetMapping("/activity")
+    @Operation(summary = "Get recent activity", description = "Get recent admin activity log")
+    public ResponseEntity<ApiResponse<List<ActivityResponse>>> getRecentActivity(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        log.info("Get recent activity - limit: {}", limit);
+
+        List<ActivityResponse> response = adminService.getRecentActivity(limit);
 
         return ResponseEntity.ok(ApiResponse.success(response));
     }

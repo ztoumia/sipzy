@@ -40,6 +40,10 @@ public class Roaster {
     @Column(length = 500)
     private String logoUrl;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isVerified = true;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
