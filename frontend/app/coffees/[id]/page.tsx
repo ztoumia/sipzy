@@ -20,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { StarRating } from '@/components/ui/StarRating';
 import { ReviewCard } from '@/components/ReviewCard';
 import { CoffeeCard } from '@/components/CoffeeCard';
-import { coffeeApi, reviewApi } from '@/lib/api/mockApi';
+import api from '@/lib/api/realApi';
 import { Coffee } from '@/types';
 
 // Composant pour les informations du café
@@ -220,7 +220,7 @@ const CoffeeInfo = ({ coffee }: { coffee: Coffee }) => {
 
 // Composant pour les avis
 const ReviewsSection = async ({ coffeeId }: { coffeeId: number }) => {
-  const reviewsResult = await reviewApi.getReviewsByCoffeeId(coffeeId, 1, 10);
+  const reviewsResult = await api.reviews.getByCoffeeId(coffeeId, 1, 10);
 
   return (
     <div className="space-y-6">
@@ -264,7 +264,7 @@ const ReviewsSection = async ({ coffeeId }: { coffeeId: number }) => {
 
 // Composant pour les cafés similaires
 const SimilarCoffees = async ({ coffeeId }: { coffeeId: number }) => {
-  const similarCoffees = await coffeeApi.getSimilarCoffees(coffeeId, 4);
+  const similarCoffees = await api.coffees.getSimilar(coffeeId, 4);
 
   if (similarCoffees.length === 0) {
     return null;
@@ -293,8 +293,8 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
     notFound();
   }
 
-  const coffee = await coffeeApi.getCoffeeById(coffeeId);
-  
+  const coffee = await api.coffees.getById(coffeeId);
+
   if (!coffee) {
     notFound();
   }

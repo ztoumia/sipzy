@@ -81,29 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: RegisterData) => {
     try {
-      const result = await authApi.register(data);
-      if (result) {
-        setUser(result.user);
-        localStorage.setItem('auth_token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+      const result = await api.auth.register(data);
+      setUser(result.user);
+      setAuthToken(result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
 
-        // Stocker aussi dans un cookie pour le middleware
-        document.cookie = `auth_token=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
-      } else {
-        throw new Error('Un compte avec cet email ou nom d\'utilisateur existe déjà');
-      }
+      // Stocker aussi dans un cookie pour le middleware
+      document.cookie = `authToken=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
     } catch (error) {
-      throw error;
+      const message = getErrorMessage(error);
+      throw new Error(message);
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('auth_token');
+    removeAuthToken();
     localStorage.removeItem('user');
 
     // Supprimer aussi le cookie
-    document.cookie = 'auth_token=; path=/; max-age=0';
+    document.cookie = 'authToken=; path=/; max-age=0';
 
     // Rediriger vers la page d'accueil
     if (typeof window !== 'undefined') {
@@ -113,14 +110,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (data: Partial<User>) => {
     try {
-      // En production, ce serait un appel API réel
       if (user) {
-        const updatedUser = { ...user, ...data };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        const result = await api.users.updateProfile({
+          username: data.username,
+          bio: data.bio,
+          avatarUrl: data.avatarUrl,
+        });
+        setUser(result);
+        localStorage.setItem('user', JSON.stringify(result));
       }
     } catch (error) {
-      throw new Error('Erreur lors de la mise à jour du profil');
+      const message = getErrorMessage(error);
+      throw new Error(message);
     }
   };
 

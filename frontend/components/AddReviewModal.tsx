@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/Button';
 import { StarRating } from '@/components/ui/StarRating';
 import { ImageUpload } from '@/components/ui/ImageUpload';
-import { reviewApi } from '@/lib/api/mockApi';
+import api from '@/lib/api/realApi';
 import { User } from '@/types';
 import { useToast } from '@/hooks/useToast';
 import { addReviewSchema, type AddReviewInput } from '@/lib/validation/schemas';
@@ -93,11 +93,11 @@ export default function AddReviewModal({ coffeeId, onClose, onCreated }: AddRevi
     }
 
     try {
-      const created = await reviewApi.createReview({
+      const created = await api.reviews.create({
         coffeeId,
-        userId: currentUser.id,
         rating: data.rating,
         comment: data.comment.trim(),
+        brewMethod: undefined,
       });
 
       toast.success('Avis publié', 'Votre avis a été publié avec succès');
