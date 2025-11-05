@@ -81,17 +81,21 @@ apiClient.interceptors.response.use(
   async (error: AxiosError<ErrorResponse>) => {
     // Log error in development (client side only)
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-      console.error('[API Error]', {
-        message: error.message,
-        url: error.config?.url || 'unknown',
-        method: error.config?.method?.toUpperCase() || 'unknown',
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        hasResponse: !!error.response,
-        hasRequest: !!error.request,
-        code: error.code,
-      });
+      console.group('🔴 [API Error]');
+      console.log('Message:', error.message);
+      console.log('URL:', error.config?.url || 'unknown');
+      console.log('Method:', error.config?.method?.toUpperCase() || 'unknown');
+      console.log('Status:', error.response?.status);
+      console.log('Status Text:', error.response?.statusText);
+      console.log('Response Data:', error.response?.data);
+      console.log('Error Code:', error.code);
+      console.log('Has Response:', !!error.response);
+      console.log('Has Request:', !!error.request);
+      if (error.response?.data) {
+        console.log('Response Message:', error.response.data.message || error.response.data.error || 'No message');
+      }
+      console.log('Full Error:', error);
+      console.groupEnd();
     }
 
     // Handle specific error cases (client side only)

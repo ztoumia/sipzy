@@ -38,8 +38,10 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     try {
+      console.log('🔵 [Login Page] Attempting login for:', data.email);
       await login(data.email, data.password);
 
+      console.log('✅ [Login Page] Login successful');
       toast.success('Connexion réussie', 'Bienvenue sur Sipzy !');
 
       // Récupérer la page de redirection depuis les query params ou localStorage
@@ -47,10 +49,10 @@ export default function LoginPage() {
       localStorage.removeItem('redirect_after_login');
       router.push(redirectUrl);
     } catch (err) {
-      toast.error(
-        'Erreur de connexion',
-        err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.'
-      );
+      console.log('🔴 [Login Page] Login failed:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.';
+      console.log('🔴 [Login Page] Showing error to user:', errorMessage);
+      toast.error('Erreur de connexion', errorMessage);
     }
   };
 
