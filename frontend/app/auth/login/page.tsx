@@ -197,7 +197,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => {
                       setValue('email', 'admin@sipzy.coffee');
-                      setValue('password', 'admin123');
+                      setValue('password', 'Admin123!');
                     }}
                     className="text-left px-3 py-2 bg-amber-50 rounded border-2 border-amber-400 hover:border-amber-500 transition-colors text-sm"
                   >

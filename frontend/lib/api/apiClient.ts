@@ -212,6 +212,7 @@ export function isErrorResponse(error: unknown): error is AxiosError<ErrorRespon
  * Extract error message from API error
  */
 export function getErrorMessage(error: unknown): string {
+  // Check if it's an Axios error with response
   if (isErrorResponse(error)) {
     const errorData = error.response?.data;
 
@@ -222,15 +223,50 @@ export function getErrorMessage(error: unknown): string {
     }
 
     // Standard error message
-    return errorData.message || 'An unexpected error occurred';
+    return errorData.message || 'Une erreur est survenue';
+  }
+
+  // Check if it's a basic Axios error (without proper ErrorResponse structure)
+  if (error && typeof error === 'object' && 'response' in error) {
+    const axiosError = error as any;
+
+    // Try to extract message from response data
+    if (axiosError.response?.data) {
+      const data = axiosError.response.data;
+
+      // Try different message formats
+      if (typeof data === 'string') return data;
+      if (data.message) return data.message;
+      if (data.error) return data.error;
+    }
+
+    // Fallback to status text
+    if (axiosError.response?.status === 401) {
+      return 'Email ou mot de passe incorrect';
+    }
+    if (axiosError.response?.status === 403) {
+      return 'Accès refusé';
+    }
+    if (axiosError.response?.status === 404) {
+      return 'Ressource non trouvée';
+    }
+    if (axiosError.response?.status >= 500) {
+      return 'Erreur serveur. Veuillez réessayer plus tard.';
+    }
+
+    return axiosError.response?.statusText || 'Une erreur est survenue';
   }
 
   // Network or other errors
   if (error instanceof Error) {
+    // Network error
+    if (error.message === 'Network Error') {
+      return 'Impossible de se connecter au serveur. Vérifiez votre connexion.';
+    }
     return error.message;
   }
 
-  return 'An unexpected error occurred';
+  return 'Une erreur inattendue est survenue';
 }
 
 /**
