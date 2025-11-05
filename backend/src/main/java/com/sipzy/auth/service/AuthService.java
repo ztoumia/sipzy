@@ -73,14 +73,28 @@ public class AuthService {
      * Login user
      */
     public AuthResponse login(LoginRequest request) {
-        log.info("Login attempt for email: {}", request.getEmail());
+        log.info("Login request for email: {}", request.getEmail());
 
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+                .orElseThrow(() -> {
+                    log.warn("Login failed: User not found for email: {}", request.getEmail());
+                    return new UnauthorizedException("Invalid email or password");
+                });
+
+        // Debug logging
+        log.info("User found: id={}, username={}, role={}", user.getId(), user.getUsername(), user.getRole());
+        log.info("Input password: '{}'", request.getPassword());
+        log.info("Input password length: {}", request.getPassword().length());
+        log.info("Stored hash: {}", user.getPasswordHash());
+        log.info("Hash length: {}", user.getPasswordHash() != null ? user.getPasswordHash().length() : "NULL");
 
         // Check password
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+        log.info("Password match result: {}", matches);
+
+        if (!matches) {
+            log.error("Login failed: Password does not match for email: {}", request.getEmail());
             throw new UnauthorizedException("Invalid email or password");
         }
 
