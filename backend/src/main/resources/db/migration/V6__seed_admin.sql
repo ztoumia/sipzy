@@ -3,7 +3,7 @@
 -- Admin user: admin@sipzy.coffee / Admin123!
 -- Password hash for "Admin123!" using BCrypt with strength 12
 INSERT INTO users (username, email, password_hash, role, is_verified, bio, created_at, updated_at) VALUES
-    ('admin', 'admin@sipzy.coffee', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lwih.1Y9vJSOhK7va', 'ADMIN', TRUE, 'Sipzy Coffee Admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ('admin', 'admin@sipzy.coffee', '$2a$12$8sEzHGqvjrT0L.VqYKp8NOHc7FY9zKQqLqRXm8yMWJNJvW5eLqzDO', 'ADMIN', TRUE, 'Sipzy Coffee Admin', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (email) DO NOTHING;
 
 -- Demo user: demo@sipzy.coffee / Demo123!
