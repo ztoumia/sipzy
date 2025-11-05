@@ -82,10 +82,15 @@ apiClient.interceptors.response.use(
     // Log error in development (client side only)
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.error('[API Error]', {
-        url: error.config?.url,
-        method: error.config?.method,
+        message: error.message,
+        url: error.config?.url || 'unknown',
+        method: error.config?.method?.toUpperCase() || 'unknown',
         status: error.response?.status,
+        statusText: error.response?.statusText,
         data: error.response?.data,
+        hasResponse: !!error.response,
+        hasRequest: !!error.request,
+        code: error.code,
       });
     }
 
