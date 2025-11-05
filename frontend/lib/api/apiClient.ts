@@ -32,15 +32,17 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('authToken');
+    // Get token from localStorage (only on client side)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('authToken');
 
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     // Log request in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
         params: config.params,
         data: config.data,
@@ -50,7 +52,9 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('[API Request Error]', error);
+    if (typeof window !== 'undefined') {
+      console.error('[API Request Error]', error);
+    }
     return Promise.reject(error);
   }
 );
@@ -64,8 +68,8 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Log response in development
-    if (process.env.NODE_ENV === 'development') {
+    // Log response in development (client side only)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
         status: response.status,
         data: response.data,
@@ -75,8 +79,8 @@ apiClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError<ErrorResponse>) => {
-    // Log error in development
-    if (process.env.NODE_ENV === 'development') {
+    // Log error in development (client side only)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.error('[API Error]', {
         url: error.config?.url,
         method: error.config?.method,
@@ -85,63 +89,65 @@ apiClient.interceptors.response.use(
       });
     }
 
-    // Handle specific error cases
-    if (error.response) {
-      const { status, data } = error.response;
+    // Handle specific error cases (client side only)
+    if (typeof window !== 'undefined') {
+      if (error.response) {
+        const { status, data } = error.response;
 
-      switch (status) {
-        case 401: {
-          // Unauthorized - Token expired or invalid
-          handleUnauthorized();
-          break;
-        }
+        switch (status) {
+          case 401: {
+            // Unauthorized - Token expired or invalid
+            handleUnauthorized();
+            break;
+          }
 
-        case 403: {
-          // Forbidden - Insufficient permissions
-          console.warn('[API] Access denied:', data.message);
-          break;
-        }
+          case 403: {
+            // Forbidden - Insufficient permissions
+            console.warn('[API] Access denied:', data.message);
+            break;
+          }
 
-        case 404: {
-          // Not Found
-          console.warn('[API] Resource not found:', data.message);
-          break;
-        }
+          case 404: {
+            // Not Found
+            console.warn('[API] Resource not found:', data.message);
+            break;
+          }
 
-        case 409: {
-          // Conflict - Duplicate resource
-          console.warn('[API] Conflict:', data.message);
-          break;
-        }
+          case 409: {
+            // Conflict - Duplicate resource
+            console.warn('[API] Conflict:', data.message);
+            break;
+          }
 
-        case 422: {
-          // Validation Error
-          console.warn('[API] Validation failed:', data.validationErrors);
-          break;
-        }
+          case 422: {
+            // Validation Error
+            console.warn('[API] Validation failed:', data.validationErrors);
+            break;
+          }
 
-        case 429: {
-          // Rate limit exceeded
-          console.warn('[API] Rate limit exceeded');
-          break;
-        }
+          case 429: {
+            // Rate limit exceeded
+            console.warn('[API] Rate limit exceeded');
+            break;
+          }
 
-        case 500: {
-          // Internal Server Error
-          console.error('[API] Server error:', data.message);
-          break;
-        }
+          case 500: {
+            // Internal Server Error
+            console.error('[API] Server error:', data.message);
+            break;
+          }
 
-        default: {
-          console.error('[API] Unexpected error:', data.message);
+          default: {
+            console.error('[API] Unexpected error:', data.message);
+          }
         }
+      } else if (error.request) {
+        // Request made but no response received
+        console.error('[API] No response from server:', error.message);
+      } else {
+        // Error setting up the request
+        console.error('[API] Request setup error:', error.message);
       }
-    } else if (error.request) {
-      // Request made but no response received
-      console.error('[API] No response from server:', error.message);
-    } else {
-      // Error setting up the request
-      console.error('[API] Request setup error:', error.message);
     }
 
     return Promise.reject(error);
@@ -157,6 +163,8 @@ apiClient.interceptors.response.use(
  * Clear token and redirect to login
  */
 function handleUnauthorized() {
+  if (typeof window === 'undefined') return;
+
   console.warn('[API] Session expired or unauthorized');
 
   // Clear auth data
@@ -164,7 +172,7 @@ function handleUnauthorized() {
   localStorage.removeItem('user');
 
   // Redirect to login if not already there
-  if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+  if (!window.location.pathname.includes('/login')) {
     window.location.href = '/login?expired=true';
   }
 }
@@ -238,22 +246,29 @@ export function getValidationErrors(error: unknown): Record<string, string> | nu
  * Set authentication token
  */
 export function setAuthToken(token: string) {
-  localStorage.setItem('authToken', token);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('authToken', token);
+  }
 }
 
 /**
  * Get authentication token
  */
 export function getAuthToken(): string | null {
-  return localStorage.getItem('authToken');
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return null;
 }
 
 /**
  * Remove authentication token
  */
 export function removeAuthToken() {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+  }
 }
 
 /**
