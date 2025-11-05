@@ -1,7 +1,5 @@
 import { User, Review, Coffee, UserProfileForm } from '@/types';
-import { userApi, reviewApi, coffeeApi } from '@/lib/api/mockApi';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import api from './realApi';
 
 /**
  * Interface pour les statistiques du profil utilisateur
@@ -33,69 +31,81 @@ export interface UserPreferences {
 }
 
 class ProfileApi {
-  private getAuthToken(): string | null {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('auth_token');
-    }
-    return null;
-  }
-
-  private getHeaders(): HeadersInit {
-    const token = this.getAuthToken();
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    return headers;
-  }
-
   /**
    * Récupère le profil public d'un utilisateur par son username
    */
   async getUserProfile(username: string): Promise<UserProfile | null> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(`${API_URL}/api/users/${username}/profile`, {
-      //   headers: this.getHeaders(),
-      // });
-      // if (!response.ok) throw new Error('Failed to fetch user profile');
-      // return await response.json();
+      // Use real API
+      // Get user by username
+      const userResponse = await api.users.getByUsername(username);
 
-      // Mock data pour développement
-      const user = await userApi.getUserByUsername(username);
-      if (!user) return null;
+      // Get user profile with stats
+      const profileData = await api.users.getProfile(userResponse.id);
 
-      // Récupérer les avis de l'utilisateur
-      const reviewsResponse = await userApi.getUserReviews(user.id, 1, 1000);
-      const userReviews = reviewsResponse.data;
-
-      // Récupérer tous les cafés et filtrer ceux soumis par l'utilisateur
-      const coffeesResponse = await coffeeApi.getCoffees({}, 1, 1000);
-      const userCoffees = coffeesResponse.data.filter(
-        (c: Coffee) => c.submittedBy === user.id && c.status === 'APPROVED'
-      );
+      // Map backend types to frontend types
+      const user: User = {
+        id: userResponse.id,
+        username: userResponse.username,
+        email: userResponse.email,
+        role: userResponse.role as 'USER' | 'ADMIN',
+        avatarUrl: userResponse.avatarUrl,
+        bio: userResponse.bio,
+        isVerified: userResponse.emailVerified,
+        createdAt: userResponse.createdAt,
+        updatedAt: userResponse.updatedAt,
+      };
 
       const stats: UserProfileStats = {
-        totalReviews: userReviews.length,
-        totalCoffeesSubmitted: userCoffees.length,
-        averageRating: userReviews.length > 0
-          ? userReviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / userReviews.length
-          : 0,
-        helpfulVotes: userReviews.reduce((sum: number, r: Review) => sum + r.helpfulCount, 0),
+        totalReviews: profileData.stats.totalReviews,
+        totalCoffeesSubmitted: profileData.stats.totalCoffeesSubmitted,
+        averageRating: profileData.stats.averageRating,
+        helpfulVotes: profileData.stats.totalHelpfulVotes,
       };
+
+      // Map recent reviews
+      const recentReviews: Review[] = profileData.recentReviews.map(r => ({
+        id: r.id,
+        coffeeId: r.coffee.id,
+        userId: r.user.id,
+        rating: r.rating,
+        comment: r.comment,
+        imageUrl: r.imageUrl,
+        helpfulCount: r.helpfulVotes,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      }));
+
+      // Map approved coffees
+      const approvedCoffees: Coffee[] = profileData.approvedCoffees.map(c => ({
+        id: c.id,
+        name: c.name,
+        roasterId: c.roaster.id,
+        roasterName: c.roaster.name,
+        roasterCountry: c.roaster.location,
+        origin: c.origin,
+        roastLevel: c.roastLevel,
+        price: c.price,
+        process: c.process,
+        description: c.description,
+        imageUrl: c.imageUrl,
+        notes: c.notes.map(n => n.name),
+        averageRating: c.averageRating,
+        totalReviews: c.totalReviews,
+        status: c.status as 'PENDING' | 'APPROVED' | 'REJECTED',
+        submittedBy: userResponse.id,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+      }));
 
       return {
         user,
         stats,
-        recentReviews: userReviews.slice(0, 10),
-        approvedCoffees: userCoffees.slice(0, 10),
+        recentReviews,
+        approvedCoffees,
       };
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('🔴 [ProfileApi] Error fetching user profile:', error);
       return null;
     }
   }
@@ -105,20 +115,22 @@ class ProfileApi {
    */
   async getUserReviews(username: string, page: number = 1, limit: number = 10): Promise<Review[]> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(
-      //   `${API_URL}/api/users/${username}/reviews?page=${page}&limit=${limit}`,
-      //   { headers: this.getHeaders() }
-      // );
-      // if (!response.ok) throw new Error('Failed to fetch user reviews');
-      // return await response.json();
+      // Use real API
+      const userResponse = await api.users.getByUsername(username);
+      const reviewsPage = await api.users.getReviews(userResponse.id, { page, limit });
 
-      // Mock data pour développement
-      const user = await userApi.getUserByUsername(username);
-      if (!user) return [];
-
-      const reviewsResponse = await userApi.getUserReviews(user.id, page, limit);
-      return reviewsResponse.data;
+      // Map to frontend Review type
+      return reviewsPage.data.map(r => ({
+        id: r.id,
+        coffeeId: r.coffee.id,
+        userId: r.user.id,
+        rating: r.rating,
+        comment: r.comment,
+        imageUrl: r.imageUrl,
+        helpfulCount: r.helpfulVotes,
+        createdAt: r.createdAt,
+        updatedAt: r.updatedAt,
+      }));
     } catch (error) {
       console.error('Error fetching user reviews:', error);
       return [];
@@ -130,27 +142,31 @@ class ProfileApi {
    */
   async getUserCoffees(username: string, page: number = 1, limit: number = 10): Promise<Coffee[]> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(
-      //   `${API_URL}/api/users/${username}/coffees?page=${page}&limit=${limit}`,
-      //   { headers: this.getHeaders() }
-      // );
-      // if (!response.ok) throw new Error('Failed to fetch user coffees');
-      // return await response.json();
+      // Use real API
+      const userResponse = await api.users.getByUsername(username);
+      const coffeesPage = await api.users.getCoffees(userResponse.id, { page, limit });
 
-      // Mock data pour développement
-      const user = await userApi.getUserByUsername(username);
-      if (!user) return [];
-
-      const coffeesResponse = await coffeeApi.getCoffees({}, 1, 1000);
-      const userCoffees = coffeesResponse.data.filter(
-        (c: Coffee) => c.submittedBy === user.id && c.status === 'APPROVED'
-      );
-
-      // Pagination manuelle
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      return userCoffees.slice(start, end);
+      // Map to frontend Coffee type
+      return coffeesPage.data.map(c => ({
+        id: c.id,
+        name: c.name,
+        roasterId: c.roaster.id,
+        roasterName: c.roaster.name,
+        roasterCountry: c.roaster.location,
+        origin: c.origin,
+        roastLevel: c.roastLevel,
+        price: c.price,
+        process: c.process,
+        description: c.description,
+        imageUrl: c.imageUrl,
+        notes: c.notes.map(n => n.name),
+        averageRating: c.averageRating,
+        totalReviews: c.totalReviews,
+        status: c.status as 'PENDING' | 'APPROVED' | 'REJECTED',
+        submittedBy: userResponse.id,
+        createdAt: c.createdAt,
+        updatedAt: c.updatedAt,
+      }));
     } catch (error) {
       console.error('Error fetching user coffees:', error);
       return [];
@@ -162,32 +178,27 @@ class ProfileApi {
    */
   async updateProfile(data: UserProfileForm): Promise<User | null> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(`${API_URL}/api/users/profile`, {
-      //   method: 'PUT',
-      //   headers: this.getHeaders(),
-      //   body: JSON.stringify(data),
-      // });
-      // if (!response.ok) throw new Error('Failed to update profile');
-      // const updatedUser = await response.json();
-
-      // Mock: Simuler la mise à jour
-      const token = this.getAuthToken();
-      if (!token) throw new Error('Not authenticated');
-
-      const userStr = localStorage.getItem('user');
-      if (!userStr) throw new Error('User not found');
-
-      const currentUser = JSON.parse(userStr);
-      const updatedUser = {
-        ...currentUser,
+      // Use real API
+      const userResponse = await api.users.updateProfile({
         username: data.username,
         bio: data.bio,
         avatarUrl: data.avatarUrl,
-        updatedAt: new Date().toISOString(),
+      });
+
+      // Map to frontend User type
+      const updatedUser: User = {
+        id: userResponse.id,
+        username: userResponse.username,
+        email: userResponse.email,
+        role: userResponse.role as 'USER' | 'ADMIN',
+        avatarUrl: userResponse.avatarUrl,
+        bio: userResponse.bio,
+        isVerified: userResponse.emailVerified,
+        createdAt: userResponse.createdAt,
+        updatedAt: userResponse.updatedAt,
       };
 
-      // Mettre à jour le localStorage
+      // Update localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
 
       return updatedUser;
@@ -240,25 +251,9 @@ class ProfileApi {
    */
   async getPreferences(): Promise<UserPreferences | null> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(`${API_URL}/api/users/preferences`, {
-      //   headers: this.getHeaders(),
-      // });
-      // if (!response.ok) throw new Error('Failed to fetch preferences');
-      // return await response.json();
-
-      // Mock: Récupérer depuis localStorage
-      const prefsStr = localStorage.getItem('user_preferences');
-      if (!prefsStr) {
-        // Préférences par défaut
-        return {
-          emailNotifications: true,
-          reviewNotifications: true,
-          coffeeApprovalNotifications: true,
-        };
-      }
-
-      return JSON.parse(prefsStr);
+      // Use real API
+      const prefs = await api.users.getPreferences();
+      return prefs;
     } catch (error) {
       console.error('Error fetching preferences:', error);
       return null;
@@ -270,17 +265,8 @@ class ProfileApi {
    */
   async updatePreferences(preferences: UserPreferences): Promise<boolean> {
     try {
-      // TODO: Remplacer par appel API réel
-      // const response = await fetch(`${API_URL}/api/users/preferences`, {
-      //   method: 'PUT',
-      //   headers: this.getHeaders(),
-      //   body: JSON.stringify(preferences),
-      // });
-      // if (!response.ok) throw new Error('Failed to update preferences');
-      // return true;
-
-      // Mock: Sauvegarder dans localStorage
-      localStorage.setItem('user_preferences', JSON.stringify(preferences));
+      // Use real API
+      await api.users.updatePreferences(preferences);
       return true;
     } catch (error) {
       console.error('Error updating preferences:', error);

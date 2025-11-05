@@ -5,7 +5,11 @@
       "Bash(./gradlew test:*)",
       "Bash(npm install:*)",
       "Bash(.env.local)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(./gradlew compileTestJava:*)",
+      "Bash(./gradlew:*)",
+      "Bash(findstr:*)",
+      "Bash(netstat:*)"
     ],
     "deny": [],
     "ask": []

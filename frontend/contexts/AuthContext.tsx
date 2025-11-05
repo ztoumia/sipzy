@@ -74,9 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Stocker aussi dans un cookie pour le middleware
       document.cookie = `authToken=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
     } catch (error) {
-      console.log('🔴 [AuthContext] Login failed, extracting error message...');
       const message = getErrorMessage(error);
-      console.log('🔴 [AuthContext] Error message:', message);
       throw new Error(message);
     }
   };
