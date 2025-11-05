@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Shield, Coffee, FileText, Users, Activity } from 'lucide-react';
+import { Shield, Coffee, FileText, Users, Activity, Database } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Navigation rapide */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <Link href="/admin/coffees">
               <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-6">
@@ -185,6 +185,22 @@ export default function AdminDashboard() {
                     <div>
                       <p className="font-semibold text-coffee-900">Activité</p>
                       <p className="text-sm text-coffee-600">Logs</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/admin/data">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <Database className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-coffee-900">Données</p>
+                      <p className="text-sm text-coffee-600">Tables</p>
                     </div>
                   </div>
                 </CardContent>
