@@ -26,13 +26,21 @@ export function FavoriteButton({
 
   // Charger l'état initial
   useEffect(() => {
-    if (user) {
-      const favorite = favoritesApi.isFavorite(user.id, String(coffeeId));
-      setIsFavorite(favorite);
-    }
-  }, [user, coffeeId]);
+    const checkFavorite = async () => {
+      if (user && isAuthenticated) {
+        try {
+          const favorite = await favoritesApi.isFavorite(Number(coffeeId));
+          setIsFavorite(favorite);
+        } catch (error) {
+          console.error('Error checking favorite status:', error);
+        }
+      }
+    };
 
-  const handleClick = (e: React.MouseEvent) => {
+    checkFavorite();
+  }, [user, isAuthenticated, coffeeId]);
+
+  const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -43,16 +51,20 @@ export function FavoriteButton({
     }
 
     // Basculer l'état favori
-    const newIsFavorite = favoritesApi.toggleFavorite(user.id, String(coffeeId));
-    setIsFavorite(newIsFavorite);
+    try {
+      const newIsFavorite = await favoritesApi.toggleFavorite(Number(coffeeId));
+      setIsFavorite(newIsFavorite);
 
-    // Animation
-    setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300);
+      // Animation
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 300);
 
-    // Callback
-    if (onToggle) {
-      onToggle(newIsFavorite);
+      // Callback
+      if (onToggle) {
+        onToggle(newIsFavorite);
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     }
   };
 

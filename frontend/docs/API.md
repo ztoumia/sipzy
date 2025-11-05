@@ -826,28 +826,127 @@ Response:
 
 ---
 
-## Favorites (Client-side)
+## Favorites
 
-**Note:** Les favoris sont actuellement gérés côté client via `localStorage`. Une API backend pourrait être ajoutée pour synchroniser entre appareils.
+**Note:** Les favoris sont maintenant gérés par le backend avec synchronisation automatique.
 
+### Add to Favorites
 ```typescript
-// Client-side operations via favoritesApi
+POST /api/users/favorites/{coffeeId}
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee added to favorites"
+}
+```
+
+### Remove from Favorites
+```typescript
+DELETE /api/users/favorites/{coffeeId}
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee removed from favorites"
+}
+```
+
+### Toggle Favorite
+```typescript
+POST /api/users/favorites/{coffeeId}/toggle
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee added to favorites",
+  "data": {
+    "isFavorite": true
+  }
+}
+```
+
+### Check if Favorite
+```typescript
+GET /api/users/favorites/{coffeeId}/check
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": {
+    "isFavorite": true
+  }
+}
+```
+
+### Get User Favorites
+```typescript
+GET /api/users/favorites?page=1&limit=12
+Authorization: Bearer {token}
+
+Response: {
+  "data": [
+    { /* Coffee object */ }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 12,
+    "total": 24,
+    "totalPages": 2,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+### Get Favorite IDs
+```typescript
+GET /api/users/favorites/ids
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": [1, 5, 12, 23, 45]
+}
+```
+
+### Get Favorite Count
+```typescript
+GET /api/users/favorites/count
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": {
+    "count": 24
+  }
+}
+```
+
+### Using the Favorites API
+```typescript
 import { favoritesApi } from '@/lib/api/favoritesApi';
 
-// Get favorite IDs
-const favoriteIds = favoritesApi.getFavoriteIds(userId);
+// Add to favorites
+await favoritesApi.addFavorite(coffeeId);
 
-// Get full favorite coffees
-const favorites = await favoritesApi.getFavorites(userId);
-
-// Check if coffee is favorite
-const isFav = favoritesApi.isFavorite(userId, coffeeId);
+// Remove from favorites
+await favoritesApi.removeFavorite(coffeeId);
 
 // Toggle favorite
-const added = favoritesApi.toggleFavorite(userId, coffeeId);
+const isFavorite = await favoritesApi.toggleFavorite(coffeeId);
+
+// Check if favorite
+const isFav = await favoritesApi.isFavorite(coffeeId);
+
+// Get favorites with pagination
+const favorites = await favoritesApi.getFavorites(page, limit);
+
+// Get favorite IDs
+const favoriteIds = await favoritesApi.getFavoriteIds();
 
 // Get count
-const count = favoritesApi.getFavoritesCount(userId);
+const count = await favoritesApi.getFavoritesCount();
 ```
 
 ---

@@ -39,18 +39,17 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginInput) => {
     try {
       await login(data.email, data.password);
-
       toast.success('Connexion réussie', 'Bienvenue sur Sipzy !');
 
       // Récupérer la page de redirection depuis les query params ou localStorage
       const redirectUrl = searchParams.get('redirect') || localStorage.getItem('redirect_after_login') || '/';
       localStorage.removeItem('redirect_after_login');
-      router.push(redirectUrl);
+
+      // Use window.location for reliable redirect after login
+      window.location.href = redirectUrl;
     } catch (err) {
-      toast.error(
-        'Erreur de connexion',
-        err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.'
-      );
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.';
+      toast.error('Erreur de connexion', errorMessage);
     }
   };
 
@@ -174,24 +173,13 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setValue('email', 'marie.dupont@email.com');
-                      setValue('password', 'password123');
+                      setValue('email', 'demo@sipzy.coffee');
+                      setValue('password', 'admin123');
                     }}
                     className="text-left px-3 py-2 bg-white rounded border border-blue-200 hover:border-blue-400 transition-colors text-sm"
                   >
                     <div className="font-medium text-coffee-900">Marie Dupont</div>
-                    <div className="text-xs text-coffee-600">marie.dupont@email.com</div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setValue('email', 'alex.martin@email.com');
-                      setValue('password', 'password123');
-                    }}
-                    className="text-left px-3 py-2 bg-white rounded border border-blue-200 hover:border-blue-400 transition-colors text-sm"
-                  >
-                    <div className="font-medium text-coffee-900">Alex Martin</div>
-                    <div className="text-xs text-coffee-600">alex.martin@email.com</div>
+                    <div className="text-xs text-coffee-600">demo@sipzy.coffee</div>
                   </button>
                   <button
                     type="button"

@@ -373,6 +373,107 @@ Content-Type: application/json
 }
 ```
 
+## Favorites
+
+### Add to Favorites
+```http
+POST /api/users/favorites/{coffeeId}
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee added to favorites"
+}
+```
+
+### Remove from Favorites
+```http
+DELETE /api/users/favorites/{coffeeId}
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee removed from favorites"
+}
+```
+
+### Toggle Favorite
+```http
+POST /api/users/favorites/{coffeeId}/toggle
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "message": "Coffee added to favorites",
+  "data": {
+    "isFavorite": true
+  }
+}
+```
+
+### Check if Favorite
+```http
+GET /api/users/favorites/{coffeeId}/check
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": {
+    "isFavorite": true
+  }
+}
+```
+
+### Get User Favorites
+```http
+GET /api/users/favorites?page=1&limit=12
+Authorization: Bearer {token}
+
+Response: {
+  "data": [
+    {
+      "id": 1,
+      "name": "Ethiopia Yirgacheffe",
+      "roaster": {...},
+      "origin": "Ethiopia",
+      ...
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 12,
+    "total": 24,
+    "totalPages": 2,
+    "hasNext": true,
+    "hasPrev": false
+  }
+}
+```
+
+### Get Favorite IDs
+```http
+GET /api/users/favorites/ids
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": [1, 5, 12, 23, 45]
+}
+```
+
+### Get Favorite Count
+```http
+GET /api/users/favorites/count
+Authorization: Bearer {token}
+
+Response: {
+  "success": true,
+  "data": {
+    "count": 24
+  }
+}
+```
+
 ## Upload
 
 ### Get Avatar Upload Signature

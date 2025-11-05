@@ -9,12 +9,12 @@ import { CoffeeCard } from '@/components/CoffeeCard';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { favoritesApi } from '@/lib/api/favoritesApi';
-import { Coffee } from '@/types';
+import type { CoffeeResponse } from '@/lib/types/api';
 
 export default function MyFavoritesPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [favorites, setFavorites] = useState<Coffee[]>([]);
+  const [favorites, setFavorites] = useState<CoffeeResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -30,8 +30,13 @@ export default function MyFavoritesPage() {
 
     const loadFavorites = async () => {
       setIsLoading(true);
-      const favoriteCoffees = await favoritesApi.getFavorites(user.id);
-      setFavorites(favoriteCoffees);
+      try {
+        const response = await favoritesApi.getFavorites(1, 100); // Get first 100 favorites
+        setFavorites(response.data);
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        setFavorites([]);
+      }
       setIsLoading(false);
     };
 
@@ -41,8 +46,12 @@ export default function MyFavoritesPage() {
   // Recharger les favoris quand un favori est modifié
   const handleFavoriteToggle = async () => {
     if (!user) return;
-    const favoriteCoffees = await favoritesApi.getFavorites(user.id);
-    setFavorites(favoriteCoffees);
+    try {
+      const response = await favoritesApi.getFavorites(1, 100);
+      setFavorites(response.data);
+    } catch (error) {
+      console.error('Error reloading favorites:', error);
+    }
   };
 
   // Afficher un loader pendant la vérification de l'auth

@@ -54,6 +54,7 @@ pgadmin-data/
 
 # Docker
 *.sql
+!backend/src/main/resources/db/migration/*.sql
 backup_*.sql
 
 # Logs

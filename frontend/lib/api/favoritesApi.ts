@@ -1,149 +1,87 @@
 /**
  * API pour la gestion des favoris
+ * Utilise le backend real API pour gérer les favoris
  */
 
-import { Coffee } from '@/types';
-import { coffeeApi } from '@/lib/api/mockApi';
-
-const FAVORITES_STORAGE_KEY = 'sipzy_favorites';
-
-// Interface pour les favoris
-export interface UserFavorites {
-  userId: string;
-  coffeeIds: string[];
-}
-
-// Récupérer les favoris de tous les utilisateurs
-const getAllFavorites = (): UserFavorites[] => {
-  if (typeof window === 'undefined') return [];
-
-  const stored = localStorage.getItem(FAVORITES_STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
-};
-
-// Sauvegarder tous les favoris
-const saveAllFavorites = (favorites: UserFavorites[]): void => {
-  if (typeof window === 'undefined') return;
-
-  localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
-};
-
-// Récupérer les favoris d'un utilisateur
-const getUserFavoritesData = (userId: string): UserFavorites => {
-  const allFavorites = getAllFavorites();
-  const userFavorites = allFavorites.find(f => f.userId === userId);
-
-  return userFavorites || { userId, coffeeIds: [] };
-};
-
-/**
- * Récupérer les IDs des cafés favoris d'un utilisateur
- */
-export const getFavoriteIds = (userId: string): string[] => {
-  const userFavorites = getUserFavoritesData(userId);
-  return userFavorites.coffeeIds;
-};
-
-/**
- * Récupérer les cafés favoris complets d'un utilisateur
- */
-export const getFavorites = async (userId: string): Promise<Coffee[]> => {
-  const favoriteIds = getFavoriteIds(userId);
-
-  if (favoriteIds.length === 0) {
-    return [];
-  }
-
-  // Récupérer tous les cafés et filtrer par IDs favoris
-  const coffeesResponse = await coffeeApi.getCoffees({}, 1, 1000);
-  const favoriteCoffees = coffeesResponse.data.filter((coffee: Coffee) =>
-    favoriteIds.includes(coffee.id)
-  );
-
-  return favoriteCoffees;
-};
-
-/**
- * Vérifier si un café est dans les favoris d'un utilisateur
- */
-export const isFavorite = (userId: string, coffeeId: string): boolean => {
-  const favoriteIds = getFavoriteIds(userId);
-  return favoriteIds.includes(coffeeId);
-};
+import apiClient, { unwrapResponse } from './apiClient';
+import type { ApiResponse, PageResponse, CoffeeResponse } from '../types/api';
 
 /**
  * Ajouter un café aux favoris
+ * POST /api/users/favorites/{coffeeId}
  */
-export const addFavorite = (userId: string, coffeeId: string): boolean => {
-  const allFavorites = getAllFavorites();
-  const userIndex = allFavorites.findIndex(f => f.userId === userId);
-
-  if (userIndex >= 0) {
-    // L'utilisateur a déjà des favoris
-    if (!allFavorites[userIndex].coffeeIds.includes(coffeeId)) {
-      allFavorites[userIndex].coffeeIds.push(coffeeId);
-      saveAllFavorites(allFavorites);
-      return true;
-    }
-    return false; // Déjà dans les favoris
-  } else {
-    // Créer une nouvelle entrée pour l'utilisateur
-    allFavorites.push({
-      userId,
-      coffeeIds: [coffeeId],
-    });
-    saveAllFavorites(allFavorites);
-    return true;
-  }
+export const addFavorite = async (coffeeId: number): Promise<void> => {
+  await apiClient.post(`/api/users/favorites/${coffeeId}`);
 };
 
 /**
  * Retirer un café des favoris
+ * DELETE /api/users/favorites/{coffeeId}
  */
-export const removeFavorite = (userId: string, coffeeId: string): boolean => {
-  const allFavorites = getAllFavorites();
-  const userIndex = allFavorites.findIndex(f => f.userId === userId);
-
-  if (userIndex >= 0) {
-    const coffeeIndex = allFavorites[userIndex].coffeeIds.indexOf(coffeeId);
-
-    if (coffeeIndex >= 0) {
-      allFavorites[userIndex].coffeeIds.splice(coffeeIndex, 1);
-      saveAllFavorites(allFavorites);
-      return true;
-    }
-  }
-
-  return false; // Pas dans les favoris
+export const removeFavorite = async (coffeeId: number): Promise<void> => {
+  await apiClient.delete(`/api/users/favorites/${coffeeId}`);
 };
 
 /**
  * Basculer l'état favori d'un café (ajouter si absent, retirer si présent)
+ * POST /api/users/favorites/{coffeeId}/toggle
  */
-export const toggleFavorite = (userId: string, coffeeId: string): boolean => {
-  if (isFavorite(userId, coffeeId)) {
-    removeFavorite(userId, coffeeId);
-    return false; // Retiré des favoris
-  } else {
-    addFavorite(userId, coffeeId);
-    return true; // Ajouté aux favoris
-  }
+export const toggleFavorite = async (coffeeId: number): Promise<boolean> => {
+  const response = await apiClient.post<ApiResponse<{ isFavorite: boolean }>>(
+    `/api/users/favorites/${coffeeId}/toggle`
+  );
+  const data = unwrapResponse(response);
+  return data.isFavorite;
 };
 
 /**
- * Obtenir le nombre de favoris d'un utilisateur
+ * Vérifier si un café est dans les favoris
+ * GET /api/users/favorites/{coffeeId}/check
  */
-export const getFavoritesCount = (userId: string): number => {
-  const favoriteIds = getFavoriteIds(userId);
-  return favoriteIds.length;
+export const isFavorite = async (coffeeId: number): Promise<boolean> => {
+  const response = await apiClient.get<ApiResponse<{ isFavorite: boolean }>>(
+    `/api/users/favorites/${coffeeId}/check`
+  );
+  const data = unwrapResponse(response);
+  return data.isFavorite;
+};
+
+/**
+ * Récupérer tous les cafés favoris avec pagination
+ * GET /api/users/favorites?page=1&limit=12
+ */
+export const getFavorites = async (page = 1, limit = 12): Promise<PageResponse<CoffeeResponse>> => {
+  const response = await apiClient.get<PageResponse<CoffeeResponse>>('/api/users/favorites', {
+    params: { page, limit },
+  });
+  return response.data;
+};
+
+/**
+ * Récupérer les IDs de tous les cafés favoris
+ * GET /api/users/favorites/ids
+ */
+export const getFavoriteIds = async (): Promise<number[]> => {
+  const response = await apiClient.get<ApiResponse<number[]>>('/api/users/favorites/ids');
+  return unwrapResponse(response);
+};
+
+/**
+ * Obtenir le nombre de favoris
+ * GET /api/users/favorites/count
+ */
+export const getFavoritesCount = async (): Promise<number> => {
+  const response = await apiClient.get<ApiResponse<{ count: number }>>('/api/users/favorites/count');
+  const data = unwrapResponse(response);
+  return data.count;
 };
 
 export const favoritesApi = {
-  getFavoriteIds,
-  getFavorites,
-  isFavorite,
   addFavorite,
   removeFavorite,
   toggleFavorite,
+  isFavorite,
+  getFavorites,
+  getFavoriteIds,
   getFavoritesCount,
 };

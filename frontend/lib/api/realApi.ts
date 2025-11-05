@@ -118,6 +118,13 @@ export const coffeesApi = {
   },
 
   /**
+   * Alias for list() - search coffees with filters
+   */
+  async search(filters?: CoffeeFiltersRequest): Promise<PageResponse<CoffeeResponse>> {
+    return this.list(filters);
+  },
+
+  /**
    * Get coffee by ID
    * GET /api/coffees/{id}
    */
@@ -205,6 +212,13 @@ export const roastersApi = {
   },
 
   /**
+   * Alias for list() - get all roasters
+   */
+  async getAll(): Promise<RoasterResponse[]> {
+    return this.list();
+  },
+
+  /**
    * Get roaster by ID
    * GET /api/roasters/{id}
    */
@@ -226,6 +240,13 @@ export const notesApi = {
   async list(): Promise<NoteResponse[]> {
     const response = await apiClient.get<ApiResponse<NoteResponse[]>>('/api/notes');
     return unwrapResponse(response);
+  },
+
+  /**
+   * Alias for list() - get all notes
+   */
+  async getAll(): Promise<NoteResponse[]> {
+    return this.list();
   },
 
   /**
@@ -262,6 +283,13 @@ export const reviewsApi = {
       { params: options }
     );
     return response.data;
+  },
+
+  /**
+   * Alias for getForCoffee() - get reviews by coffee ID
+   */
+  async getByCoffeeId(coffeeId: number, page = 1, limit = 10): Promise<PageResponse<ReviewResponse>> {
+    return this.getForCoffee(coffeeId, { page, limit });
   },
 
   /**
