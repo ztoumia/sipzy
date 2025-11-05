@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 import { CoffeeCard } from '@/components/CoffeeCard';
 import { FiltersPanel } from '@/components/coffees/FiltersPanel';
 import { useCoffeeFilters } from '@/hooks/useCoffeeFilters';
-import { coffeeApi, noteApi, roasterApi } from '@/lib/api/mockApi';
+import api from '@/lib/api/realApi';
 import { Coffee, Note, Roaster } from '@/types';
 
 export default function CoffeesPage() {
@@ -38,8 +38,8 @@ export default function CoffeesPage() {
   useEffect(() => {
     const loadFilterOptions = async () => {
       const [notesData, roastersData] = await Promise.all([
-        noteApi.getNotes(),
-        roasterApi.getRoasters(),
+        api.notes.getAll(),
+        api.roasters.getAll(),
       ]);
       setNotes(notesData);
       setRoasters(roastersData);
@@ -52,25 +52,23 @@ export default function CoffeesPage() {
     const loadCoffees = async () => {
       setLoading(true);
       try {
-        const result = await coffeeApi.getCoffees(
-          {
-            search: filters.search,
-            origin: filters.origins.length > 0 ? filters.origins : undefined,
-            roasterId: filters.roasters.length > 0 ? filters.roasters.map(name => {
-              const roaster = roasters.find(r => r.name === name);
-              return roaster?.id || 0;
-            }) : undefined,
-            noteIds: filters.notes.length > 0 ? filters.notes.map(name => {
-              const note = notes.find(n => n.name === name);
-              return note?.id || 0;
-            }) : undefined,
-            minRating: filters.minRating > 0 ? filters.minRating : undefined,
-            sortBy: filters.sortBy,
-            sortOrder: 'desc',
-          },
+        const result = await api.coffees.search({
+          search: filters.search,
+          origin: filters.origins.length > 0 ? filters.origins : undefined,
+          roasterId: filters.roasters.length > 0 ? filters.roasters.map(name => {
+            const roaster = roasters.find(r => r.name === name);
+            return roaster?.id || 0;
+          }) : undefined,
+          noteIds: filters.notes.length > 0 ? filters.notes.map(name => {
+            const note = notes.find(n => n.name === name);
+            return note?.id || 0;
+          }) : undefined,
+          minRating: filters.minRating > 0 ? filters.minRating : undefined,
+          sortBy: filters.sortBy,
+          sortOrder: 'desc',
           page,
-          12
-        );
+          limit: 12,
+        });
         setCoffees(result.data);
         setTotalPages(result.pagination.totalPages);
       } finally {

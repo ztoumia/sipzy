@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ImageUpload } from '@/components/ui/ImageUpload';
-import { roasterApi, noteApi } from '@/lib/api/mockApi';
+import api from '@/lib/api/realApi';
 import { Roaster, Note } from '@/types';
 import { useToast } from '@/hooks/useToast';
 import { addCoffeeSchema, type AddCoffeeInput } from '@/lib/validation/schemas';
@@ -55,8 +55,8 @@ export default function NewCoffeePage() {
   useEffect(() => {
     const loadData = async () => {
       const [roastersData, notesData] = await Promise.all([
-        roasterApi.getRoasters(),
-        noteApi.getNotes(),
+        api.roasters.getAll(),
+        api.notes.getAll(),
       ]);
       setRoasters(roastersData);
       setNotes(notesData);

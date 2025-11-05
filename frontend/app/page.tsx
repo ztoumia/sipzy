@@ -1,4 +1,4 @@
-import { coffeeApi, reviewApi } from '@/lib/api/mockApi';
+import api from '@/lib/api/realApi';
 import HomePageClient from '@/components/HomePage';
 
 // Métadonnées pour le SEO - fonctionne uniquement dans Server Components
@@ -21,14 +21,14 @@ export const metadata = {
 
 export default async function HomePage() {
   // Récupérer les données côté serveur
-  const popularCoffees = await coffeeApi.getPopularCoffees(8);
-  const recentReviews = await reviewApi.getRecentReviews(6);
+  const popularCoffees = await api.coffees.getPopular(8);
+  const recentReviews = await api.reviews.getRecent(6);
 
   // Passer les données au Client Component
   return (
-    <HomePageClient 
-      popularCoffees={popularCoffees} 
-      recentReviews={recentReviews} 
+    <HomePageClient
+      popularCoffees={popularCoffees}
+      recentReviews={recentReviews}
     />
   );
 }
