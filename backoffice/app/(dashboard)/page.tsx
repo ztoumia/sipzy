@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Shield, Coffee, FileText, Users, Activity, Download } from 'lucide-react';
-import { PageHeader } from '@/components/admin/shared/PageHeader';
-import { LoadingState, LoadingSpinner } from '@/components/admin/shared/LoadingState';
-import { StatsCards } from '@/components/admin/StatsCards';
-import { CoffeeReviewQueue } from '@/components/admin/CoffeeReviewQueue';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { LoadingState, LoadingSpinner } from '@/components/shared/LoadingState';
+import { StatsCards } from '@/components/StatsCards';
+import { CoffeeReviewQueue } from '@/components/CoffeeReviewQueue';
 import { adminApi, AdminStats } from '@/lib/api/adminApi';
 import { Coffee as CoffeeType } from '@/types';
 

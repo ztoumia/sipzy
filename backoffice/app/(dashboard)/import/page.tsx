@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { FileJson, AlertCircle, CheckCircle } from 'lucide-react';
-import { JsonUploader } from '@/components/admin/import/JsonUploader';
-import { ImportProgress } from '@/components/admin/import/ImportProgress';
-import { ImportResults } from '@/components/admin/import/ImportResults';
+import { JsonUploader } from '@/components/import/JsonUploader';
+import { ImportProgress } from '@/components/import/ImportProgress';
+import { ImportResults } from '@/components/import/ImportResults';
 import {
   importApi,
   validateImportJSON,

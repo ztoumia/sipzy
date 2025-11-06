@@ -88,14 +88,14 @@ export function AdminSidebar() {
           <SidebarItem
             icon={Home}
             label="Dashboard"
-            href="/admin"
+            href="/"
           />
 
           {/* Coffees */}
           <SidebarItem
             icon={Coffee}
             label="Coffees"
-            href="/admin/coffees"
+            href="/coffees"
             badge={pendingCounts.coffees > 0 ? {
               count: pendingCounts.coffees,
               variant: 'warning'
@@ -106,14 +106,14 @@ export function AdminSidebar() {
           <SidebarItem
             icon={Users}
             label="Users"
-            href="/admin/users"
+            href="/users"
           />
 
           {/* Reports */}
           <SidebarItem
             icon={Shield}
             label="Reports"
-            href="/admin/reports"
+            href="/reports"
             badge={pendingCounts.reports > 0 ? {
               count: pendingCounts.reports,
               variant: 'danger'
@@ -124,7 +124,7 @@ export function AdminSidebar() {
           <SidebarItem
             icon={Download}
             label="Import"
-            href="/admin/import"
+            href="/import"
           />
 
           {/* Divider */}
@@ -138,21 +138,21 @@ export function AdminSidebar() {
           <SidebarItem
             icon={Activity}
             label="Activity Log"
-            href="/admin/activity"
+            href="/activity"
           />
 
           {/* Analytics */}
           <SidebarItem
             icon={BarChart}
             label="Analytics"
-            href="/admin/analytics"
+            href="/analytics"
           />
 
           {/* Settings */}
           <SidebarItem
             icon={Settings}
             label="Settings"
-            href="/admin/settings"
+            href="/settings"
           />
         </nav>
 

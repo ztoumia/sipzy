@@ -101,39 +101,6 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, isLoading = false }) =>
                 {/* Séparateur */}
                 <div className="h-6 w-px bg-coffee-300" />
 
-                {/* Admin Badge avec Dropdown */}
-                {user.role === 'ADMIN' && (
-                  <>
-                    <DropdownMenu
-                      trigger={
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-red-100 border border-red-300 rounded-full hover:bg-red-200 transition-colors cursor-pointer">
-                          <Shield className="h-4 w-4 text-red-600" />
-                          <span className="text-sm font-bold text-red-700">ADMIN</span>
-                          <ChevronDown className="h-3 w-3 text-red-600" />
-                        </div>
-                      }
-                      align="right"
-                    >
-                      <DropdownMenuLabel>Administration</DropdownMenuLabel>
-                      <DropdownMenuItem href="/admin" icon={<LayoutDashboard className="h-4 w-4" />}>
-                        Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem href="/admin/coffees" icon={<CheckCircle className="h-4 w-4" />}>
-                        Modération cafés
-                      </DropdownMenuItem>
-                      <DropdownMenuItem href="/admin/reports" icon={<Flag className="h-4 w-4" />}>
-                        Signalements
-                      </DropdownMenuItem>
-                      <DropdownMenuItem href="/admin/users" icon={<Users className="h-4 w-4" />}>
-                        Gestion utilisateurs
-                      </DropdownMenuItem>
-                    </DropdownMenu>
-
-                    {/* Séparateur */}
-                    <div className="h-6 w-px bg-coffee-300" />
-                  </>
-                )}
-
                 {/* User Profile Dropdown */}
                 <DropdownMenu
                   trigger={
@@ -258,52 +225,6 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, isLoading = false }) =>
                 </>
               ) : user ? (
                 <>
-                  {/* Section: Admin */}
-                  {user.role === 'ADMIN' && (
-                    <>
-                      <div className="px-3 pt-4 pb-2 flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-red-600" />
-                        <h3 className="text-xs font-semibold text-red-600 uppercase tracking-wider">Administration</h3>
-                      </div>
-
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-3 px-3 py-2.5 text-base font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <LayoutDashboard className="h-4 w-4" />
-                        Dashboard
-                      </Link>
-
-                      <Link
-                        href="/admin/coffees"
-                        className="flex items-center gap-3 px-3 py-2.5 text-base font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        Modération cafés
-                      </Link>
-
-                      <Link
-                        href="/admin/reports"
-                        className="flex items-center gap-3 px-3 py-2.5 text-base font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Flag className="h-4 w-4" />
-                        Signalements
-                      </Link>
-
-                      <Link
-                        href="/admin/users"
-                        className="flex items-center gap-3 px-3 py-2.5 text-base font-medium text-red-700 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        <Users className="h-4 w-4" />
-                        Gestion utilisateurs
-                      </Link>
-                    </>
-                  )}
-
                   {/* Section: Mon Compte */}
                   <div className="px-3 pt-4 pb-2">
                     <h3 className="text-xs font-semibold text-coffee-500 uppercase tracking-wider">Mon Compte</h3>

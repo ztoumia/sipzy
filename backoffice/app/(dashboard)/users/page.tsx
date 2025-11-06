@@ -1,8 +1,8 @@
 'use client';
 
 import { Users } from 'lucide-react';
-import { PageHeader } from '@/components/admin/shared/PageHeader';
-import { EmptyState } from '@/components/admin/shared/EmptyState';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 export default function UsersPage() {
   return (

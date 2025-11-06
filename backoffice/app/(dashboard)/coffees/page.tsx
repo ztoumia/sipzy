@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Coffee } from 'lucide-react';
-import { PageHeader } from '@/components/admin/shared/PageHeader';
-import { SearchBar } from '@/components/admin/shared/SearchBar';
-import { FilterTabs, FilterTab } from '@/components/admin/shared/FilterTabs';
-import { Pagination } from '@/components/admin/shared/Pagination';
-import { LoadingState } from '@/components/admin/shared/LoadingState';
-import { EmptyState } from '@/components/admin/shared/EmptyState';
-import { CoffeeReviewQueue } from '@/components/admin/CoffeeReviewQueue';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { SearchBar } from '@/components/shared/SearchBar';
+import { FilterTabs, FilterTab } from '@/components/shared/FilterTabs';
+import { Pagination } from '@/components/shared/Pagination';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { CoffeeReviewQueue } from '@/components/CoffeeReviewQueue';
 import { adminApi } from '@/lib/api/adminApi';
 import { Coffee as CoffeeType } from '@/types';
 
