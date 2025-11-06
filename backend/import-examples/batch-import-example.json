@@ -1,0 +1,53 @@
+{
+  "continueOnError": true,
+  "autoApprove": false,
+  "roasters": [
+    {
+      "name": "Café de Spécialité Paris",
+      "description": "Artisan roaster specializing in single-origin coffees from Ethiopia and Colombia",
+      "location": "Paris, France",
+      "website": "https://example.com/cafe-specialite",
+      "logoUrl": "https://example.com/images/logo.jpg",
+      "isVerified": true
+    },
+    {
+      "name": "Nordic Coffee Roasters",
+      "description": "Scandinavian approach to coffee roasting with focus on light roasts",
+      "location": "Copenhagen, Denmark",
+      "website": "https://example.com/nordic-coffee",
+      "isVerified": true
+    }
+  ],
+  "coffees": [
+    {
+      "name": "Ethiopian Yirgacheffe Natural",
+      "roasterName": "Café de Spécialité Paris",
+      "origin": "Ethiopia",
+      "process": "Natural",
+      "variety": "Heirloom",
+      "altitudeMin": 1800,
+      "altitudeMax": 2200,
+      "harvestYear": 2024,
+      "priceRange": "€€€",
+      "description": "A vibrant Ethiopian coffee with intense blueberry and floral notes. Naturally processed for maximum fruit sweetness. Perfect for pour-over brewing methods.",
+      "imageUrl": "https://example.com/images/ethiopian-yirgacheffe.jpg",
+      "noteNames": ["Blueberry", "Floral", "Citrus"],
+      "autoApprove": false
+    },
+    {
+      "name": "Colombian Huila Washed",
+      "roasterName": "Nordic Coffee Roasters",
+      "origin": "Colombia",
+      "process": "Washed",
+      "variety": "Caturra",
+      "altitudeMin": 1600,
+      "altitudeMax": 1900,
+      "harvestYear": 2024,
+      "priceRange": "€€",
+      "description": "Clean and balanced Colombian coffee with caramel sweetness and chocolate notes. Washed processing brings out clarity and brightness.",
+      "imageUrl": "https://example.com/images/colombian-huila.jpg",
+      "noteNames": ["Caramel", "Chocolate", "Nuts"],
+      "autoApprove": false
+    }
+  ]
+}

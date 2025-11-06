@@ -1,0 +1,15 @@
+{
+  "name": "Kenya AA Nyeri",
+  "roasterId": 1,
+  "origin": "Kenya",
+  "process": "Washed",
+  "variety": "SL28, SL34",
+  "altitudeMin": 1700,
+  "altitudeMax": 2100,
+  "harvestYear": 2024,
+  "priceRange": "€€€",
+  "description": "Bright and complex Kenyan coffee with blackcurrant acidity and winey notes. Double washed processing for exceptional clarity.",
+  "imageUrl": "https://example.com/images/kenya-aa.jpg",
+  "noteIds": [1, 2, 3, 4],
+  "autoApprove": false
+}
