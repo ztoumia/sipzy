@@ -8,8 +8,6 @@ import com.sipzy.importer.dto.response.ImportResponse;
 import com.sipzy.importer.dto.response.ImportResult;
 import com.sipzy.importer.service.ImportService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse as SwaggerApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -45,24 +43,21 @@ public class ImportController {
     @PostMapping("/roaster")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Import a single roaster", description = "Import or update a roaster with image download support")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "Roaster imported successfully"),
-            @SwaggerApiResponse(responseCode = "400", description = "Invalid request"),
-            @SwaggerApiResponse(responseCode = "401", description = "Unauthorized"),
-            @SwaggerApiResponse(responseCode = "403", description = "Forbidden - Admin only")
-    })
     public ResponseEntity<ApiResponse<ImportResult>> importRoaster(@Valid @RequestBody ImportRoasterRequest request) {
         log.info("Import roaster request received: {}", request.getName());
         ImportResult result = importService.importRoaster(request);
 
         if (result.getSuccess()) {
             return ResponseEntity.ok(ApiResponse.success(
-                    "Roaster imported successfully",
-                    result
+                    result,
+                    "Roaster imported successfully"
             ));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(result.getErrorMessage()));
+                    .body(ApiResponse.<ImportResult>builder()
+                            .success(false)
+                            .message(result.getErrorMessage())
+                            .build());
         }
     }
 
@@ -75,24 +70,21 @@ public class ImportController {
     @PostMapping("/coffee")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Import a single coffee", description = "Import or update a coffee with image download support")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "Coffee imported successfully"),
-            @SwaggerApiResponse(responseCode = "400", description = "Invalid request"),
-            @SwaggerApiResponse(responseCode = "401", description = "Unauthorized"),
-            @SwaggerApiResponse(responseCode = "403", description = "Forbidden - Admin only")
-    })
     public ResponseEntity<ApiResponse<ImportResult>> importCoffee(@Valid @RequestBody ImportCoffeeRequest request) {
         log.info("Import coffee request received: {}", request.getName());
         ImportResult result = importService.importCoffee(request);
 
         if (result.getSuccess()) {
             return ResponseEntity.ok(ApiResponse.success(
-                    "Coffee imported successfully",
-                    result
+                    result,
+                    "Coffee imported successfully"
             ));
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(result.getErrorMessage()));
+                    .body(ApiResponse.<ImportResult>builder()
+                            .success(false)
+                            .message(result.getErrorMessage())
+                            .build());
         }
     }
 
@@ -108,12 +100,6 @@ public class ImportController {
             summary = "Batch import roasters and coffees",
             description = "Import multiple roasters and coffees in a single request with optional error handling"
     )
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "Batch import completed"),
-            @SwaggerApiResponse(responseCode = "400", description = "Invalid request"),
-            @SwaggerApiResponse(responseCode = "401", description = "Unauthorized"),
-            @SwaggerApiResponse(responseCode = "403", description = "Forbidden - Admin only")
-    })
     public ResponseEntity<ApiResponse<ImportResponse>> batchImport(@Valid @RequestBody BatchImportRequest request) {
         log.info("Batch import request received: {} roasters, {} coffees",
                 request.getRoasters() != null ? request.getRoasters().size() : 0,
@@ -122,8 +108,8 @@ public class ImportController {
         ImportResponse response = importService.batchImport(request);
 
         return ResponseEntity.ok(ApiResponse.success(
-                response.getMessage(),
-                response
+                response,
+                response.getMessage()
         ));
     }
 
@@ -136,12 +122,6 @@ public class ImportController {
     @PostMapping("/roasters")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Import multiple roasters", description = "Import multiple roasters in a single request")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "Roasters import completed"),
-            @SwaggerApiResponse(responseCode = "400", description = "Invalid request"),
-            @SwaggerApiResponse(responseCode = "401", description = "Unauthorized"),
-            @SwaggerApiResponse(responseCode = "403", description = "Forbidden - Admin only")
-    })
     public ResponseEntity<ApiResponse<ImportResponse>> importRoasters(@Valid @RequestBody List<ImportRoasterRequest> requests) {
         log.info("Import multiple roasters request received: {} roasters", requests.size());
 
@@ -153,8 +133,8 @@ public class ImportController {
         ImportResponse response = importService.batchImport(batchRequest);
 
         return ResponseEntity.ok(ApiResponse.success(
-                response.getMessage(),
-                response
+                response,
+                response.getMessage()
         ));
     }
 
@@ -167,12 +147,6 @@ public class ImportController {
     @PostMapping("/coffees")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Import multiple coffees", description = "Import multiple coffees in a single request")
-    @ApiResponses(value = {
-            @SwaggerApiResponse(responseCode = "200", description = "Coffees import completed"),
-            @SwaggerApiResponse(responseCode = "400", description = "Invalid request"),
-            @SwaggerApiResponse(responseCode = "401", description = "Unauthorized"),
-            @SwaggerApiResponse(responseCode = "403", description = "Forbidden - Admin only")
-    })
     public ResponseEntity<ApiResponse<ImportResponse>> importCoffees(
             @Valid @RequestBody List<ImportCoffeeRequest> requests,
             @RequestParam(required = false, defaultValue = "false") Boolean autoApprove
@@ -189,8 +163,8 @@ public class ImportController {
         ImportResponse response = importService.batchImport(batchRequest);
 
         return ResponseEntity.ok(ApiResponse.success(
-                response.getMessage(),
-                response
+                response,
+                response.getMessage()
         ));
     }
 
@@ -203,8 +177,8 @@ public class ImportController {
     @Operation(summary = "Import service health check", description = "Check if the import service is operational")
     public ResponseEntity<ApiResponse<String>> health() {
         return ResponseEntity.ok(ApiResponse.success(
-                "Import service is operational",
-                "OK"
+                "OK",
+                "Import service is operational"
         ));
     }
 }
