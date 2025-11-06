@@ -1,22 +1,22 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/PageHeader';
 import { EmptyState } from '@/components/admin/shared/EmptyState';
 
-export default function ActivityPage() {
+export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={Activity}
-        title="Activity Log"
-        description="View admin activity history"
+        icon={Settings}
+        title="Settings"
+        description="Configure admin panel settings"
       />
 
       <EmptyState
-        icon={Activity}
+        icon={Settings}
         title="Coming Soon"
-        description="Activity log will be available soon"
+        description="Settings page will be available soon"
       />
     </div>
   );

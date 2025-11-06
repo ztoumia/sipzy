@@ -1,22 +1,22 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { UserX } from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/PageHeader';
 import { EmptyState } from '@/components/admin/shared/EmptyState';
 
-export default function ActivityPage() {
+export default function BannedUsersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={Activity}
-        title="Activity Log"
-        description="View admin activity history"
+        icon={UserX}
+        title="Banned Users"
+        description="View and manage banned users"
       />
 
       <EmptyState
-        icon={Activity}
+        icon={UserX}
         title="Coming Soon"
-        description="Activity log will be available soon"
+        description="Banned users list will be available soon"
       />
     </div>
   );

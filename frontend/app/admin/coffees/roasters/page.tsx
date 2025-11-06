@@ -1,22 +1,22 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { Factory } from 'lucide-react';
 import { PageHeader } from '@/components/admin/shared/PageHeader';
 import { EmptyState } from '@/components/admin/shared/EmptyState';
 
-export default function ActivityPage() {
+export default function RoastersPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        icon={Activity}
-        title="Activity Log"
-        description="View admin activity history"
+        icon={Factory}
+        title="Roasters Management"
+        description="Manage coffee roasters"
       />
 
       <EmptyState
-        icon={Activity}
+        icon={Factory}
         title="Coming Soon"
-        description="Activity log will be available soon"
+        description="Roasters management will be available soon"
       />
     </div>
   );
