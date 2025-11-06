@@ -1,6 +1,7 @@
 /**
  * Axios HTTP Client Configuration
  * Handles authentication, errors, and request/response transformations
+ * Modern Rate Limiting Support (2025 Best Practices)
  */
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
@@ -22,6 +23,72 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// ============================================================================
+// Rate Limiting State Management (2025 Best Practices)
+// ============================================================================
+
+interface RateLimitInfo {
+  limit: number;           // X-RateLimit-Limit: maximum requests allowed
+  remaining: number;       // X-RateLimit-Remaining: requests remaining
+  reset: number;           // X-RateLimit-Reset: epoch seconds when limit resets
+  retryAfter?: number;     // Retry-After: seconds to wait (only on 429)
+}
+
+/**
+ * Global rate limit state
+ * Tracks current rate limit status from response headers
+ */
+const rateLimitState: RateLimitInfo = {
+  limit: 0,
+  remaining: 0,
+  reset: 0,
+};
+
+/**
+ * Get current rate limit status
+ */
+export function getRateLimitStatus(): RateLimitInfo {
+  return { ...rateLimitState };
+}
+
+/**
+ * Check if rate limit is close to being exceeded
+ * Returns true if less than 10% remaining or less than 5 requests left
+ */
+export function isRateLimitWarning(): boolean {
+  if (rateLimitState.limit === 0) return false;
+  const percentage = rateLimitState.remaining / rateLimitState.limit;
+  return percentage < 0.1 || rateLimitState.remaining < 5;
+}
+
+/**
+ * Extract rate limit headers from response
+ */
+function extractRateLimitHeaders(response: AxiosResponse): void {
+  const headers = response.headers;
+
+  if (headers['x-ratelimit-limit']) {
+    rateLimitState.limit = parseInt(headers['x-ratelimit-limit'], 10);
+  }
+
+  if (headers['x-ratelimit-remaining']) {
+    rateLimitState.remaining = parseInt(headers['x-ratelimit-remaining'], 10);
+  }
+
+  if (headers['x-ratelimit-reset']) {
+    rateLimitState.reset = parseInt(headers['x-ratelimit-reset'], 10);
+  }
+
+  // Log warning if close to limit
+  if (isRateLimitWarning() && typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.warn('[API] Rate limit warning:', {
+      remaining: rateLimitState.remaining,
+      limit: rateLimitState.limit,
+      resetAt: new Date(rateLimitState.reset * 1000).toLocaleTimeString(),
+    });
+  }
+}
 
 // ============================================================================
 // Request Interceptor
@@ -68,6 +135,9 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    // Extract rate limit headers from all responses
+    extractRateLimitHeaders(response);
+
     // Log response in development (client side only)
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
       console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
@@ -135,8 +205,50 @@ apiClient.interceptors.response.use(
           }
 
           case 429: {
-            // Rate limit exceeded
-            console.warn('[API] Rate limit exceeded');
+            // Rate limit exceeded - Extract retry information
+            const retryAfter = error.response.headers['retry-after'];
+            const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : 60;
+
+            // Extract rate limit headers from error response
+            extractRateLimitHeaders(error.response);
+            rateLimitState.retryAfter = retryAfterSeconds;
+
+            // Calculate retry time
+            const retryTime = new Date(Date.now() + retryAfterSeconds * 1000).toLocaleTimeString();
+
+            console.warn('[API] Rate limit exceeded:', {
+              retryAfter: `${retryAfterSeconds}s`,
+              retryAt: retryTime,
+              limit: rateLimitState.limit,
+              remaining: rateLimitState.remaining,
+            });
+
+            // Attempt automatic retry for non-sensitive endpoints
+            const config = error.config;
+            const isSensitiveEndpoint = config?.url?.includes('/auth/login') ||
+                                       config?.url?.includes('/auth/register') ||
+                                       config?.url?.includes('/auth/reset-password');
+
+            // Only auto-retry for GET requests on non-sensitive endpoints
+            // and if retry delay is reasonable (less than 10 seconds)
+            if (config &&
+                config.method?.toLowerCase() === 'get' &&
+                !isSensitiveEndpoint &&
+                retryAfterSeconds <= 10 &&
+                !(config as any)._retried) {
+
+              console.log(`[API] Auto-retrying request after ${retryAfterSeconds}s...`);
+
+              // Mark request as retried to prevent infinite loops
+              (config as any)._retried = true;
+
+              // Wait for the specified retry time
+              await new Promise(resolve => setTimeout(resolve, retryAfterSeconds * 1000));
+
+              // Retry the request
+              return apiClient.request(config);
+            }
+
             break;
           }
 
@@ -253,6 +365,11 @@ export function getErrorMessage(error: unknown): string {
     }
     if (axiosError.response?.status === 404) {
       return 'Ressource non trouvée';
+    }
+    if (axiosError.response?.status === 429) {
+      const retryAfter = axiosError.response.headers['retry-after'];
+      const seconds = retryAfter ? parseInt(retryAfter, 10) : 60;
+      return `Limite de requêtes atteinte. Réessayez dans ${seconds} secondes.`;
     }
     if (axiosError.response?.status >= 500) {
       return 'Erreur serveur. Veuillez réessayer plus tard.';

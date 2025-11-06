@@ -95,11 +95,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // Add Rate Limit filter (first in chain)
-        http.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
-
-        // Add JWT authentication filter
+        // Add JWT authentication filter (first to establish authentication)
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Add Rate Limit filter (after JWT to have authentication context)
+        http.addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }

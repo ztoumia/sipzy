@@ -1,7 +1,6 @@
 package com.sipzy.coffee.repository;
 
 import com.sipzy.coffee.domain.Coffee;
-import com.sipzy.coffee.domain.CoffeeStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +14,7 @@ import java.util.List;
 @Repository
 public interface CoffeeRepository extends JpaRepository<Coffee, Long> {
 
-    Page<Coffee> findByStatus(CoffeeStatus status, Pageable pageable);
+    Page<Coffee> findByStatus(Coffee.CoffeeStatus status, Pageable pageable);
 
     Page<Coffee> findByRoasterId(Long roasterId, Pageable pageable);
 

@@ -2,27 +2,38 @@ package com.sipzy.config;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Rate Limiting Configuration using Bucket4j
+ * Modern Rate Limiting Configuration (2025 Best Practices)
  *
- * Rate limits:
- * - Anonymous users: 20 requests per minute
- * - Authenticated users: 100 requests per minute
- * - Admin users: Unlimited
+ * Features:
+ * - Token bucket algorithm with burst support
+ * - Differentiated limits by user role
+ * - Stricter limits for sensitive endpoints
+ * - Configurable via application.properties
+ * - Health check endpoints excluded
+ *
+ * Default Rate limits:
+ * - Anonymous: 60 req/min (burst: 10)
+ * - Authenticated: 600 req/min (burst: 60)
+ * - Admin: 3000 req/min (burst: 200)
+ * - Sensitive endpoints: 5 req/min (burst: 1)
  */
 @Configuration
 public class RateLimitConfig {
 
     /**
-     * Storage for user buckets (IP-based for anonymous, userId-based for authenticated)
+     * Storage for rate limit buckets (key-based: IP or userId)
      */
     @Bean
     public Map<String, Bucket> rateLimitBuckets() {
@@ -30,30 +41,94 @@ public class RateLimitConfig {
     }
 
     /**
-     * Create a bucket for anonymous users (20 requests per minute)
+     * Storage for sensitive endpoint buckets (stricter limits)
      */
-    public Bucket createAnonymousBucket() {
-        Bandwidth limit = Bandwidth.classic(20, Refill.intervally(20, Duration.ofMinutes(1)));
+    @Bean
+    public Map<String, Bucket> sensitiveBuckets() {
+        return new ConcurrentHashMap<>();
+    }
+
+    /**
+     * Rate limit properties (configurable via application.properties)
+     */
+    @Component
+    @ConfigurationProperties(prefix = "app.rate-limit")
+    @Getter
+    @Setter
+    public static class RateLimitProperties {
+
+        // Anonymous users
+        private long anonymousCapacity = 60;
+        private long anonymousRefillTokens = 60;
+        private long anonymousRefillMinutes = 1;
+
+        // Authenticated users
+        private long authenticatedCapacity = 600;
+        private long authenticatedRefillTokens = 600;
+        private long authenticatedRefillMinutes = 1;
+
+        // Admin users
+        private long adminCapacity = 3000;
+        private long adminRefillTokens = 3000;
+        private long adminRefillMinutes = 1;
+
+        // Sensitive endpoints (login, register, password reset)
+        private long sensitiveCapacity = 5;
+        private long sensitiveRefillTokens = 5;
+        private long sensitiveRefillMinutes = 1;
+    }
+
+    /**
+     * Create bucket for anonymous users (60 req/min by default)
+     */
+    public Bucket createAnonymousBucket(RateLimitProperties props) {
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(props.getAnonymousCapacity())
+                .refillIntervally(props.getAnonymousRefillTokens(), Duration.ofMinutes(props.getAnonymousRefillMinutes()))
+                .build();
+
         return Bucket.builder()
                 .addLimit(limit)
                 .build();
     }
 
     /**
-     * Create a bucket for authenticated users (100 requests per minute)
+     * Create bucket for authenticated users (600 req/min by default)
      */
-    public Bucket createAuthenticatedBucket() {
-        Bandwidth limit = Bandwidth.classic(100, Refill.intervally(100, Duration.ofMinutes(1)));
+    public Bucket createAuthenticatedBucket(RateLimitProperties props) {
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(props.getAuthenticatedCapacity())
+                .refillIntervally(props.getAuthenticatedRefillTokens(), Duration.ofMinutes(props.getAuthenticatedRefillMinutes()))
+                .build();
+
         return Bucket.builder()
                 .addLimit(limit)
                 .build();
     }
 
     /**
-     * Create a bucket for admin users (1000 requests per minute - effectively unlimited)
+     * Create bucket for admin users (3000 req/min by default)
      */
-    public Bucket createAdminBucket() {
-        Bandwidth limit = Bandwidth.classic(1000, Refill.intervally(1000, Duration.ofMinutes(1)));
+    public Bucket createAdminBucket(RateLimitProperties props) {
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(props.getAdminCapacity())
+                .refillIntervally(props.getAdminRefillTokens(), Duration.ofMinutes(props.getAdminRefillMinutes()))
+                .build();
+
+        return Bucket.builder()
+                .addLimit(limit)
+                .build();
+    }
+
+    /**
+     * Create bucket for sensitive endpoints (5 req/min by default)
+     */
+    public Bucket createSensitiveBucket(RateLimitProperties props) {
+        Bandwidth limit = Bandwidth.builder()
+                .capacity(props.getSensitiveCapacity())
+                .refillIntervally(props.getSensitiveRefillTokens(), Duration.ofMinutes(props.getSensitiveRefillMinutes()))
+                .build();
+
         return Bucket.builder()
                 .addLimit(limit)
                 .build();

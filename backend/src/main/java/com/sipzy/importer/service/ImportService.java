@@ -1,7 +1,6 @@
 package com.sipzy.importer.service;
 
 import com.sipzy.coffee.domain.Coffee;
-import com.sipzy.coffee.domain.CoffeeStatus;
 import com.sipzy.coffee.domain.Note;
 import com.sipzy.coffee.domain.Roaster;
 import com.sipzy.coffee.repository.CoffeeRepository;
@@ -114,7 +113,7 @@ public class ImportService {
         roaster.setLocation(request.getLocation());
         roaster.setWebsite(request.getWebsite());
         roaster.setLogoUrl(logoUrl);
-        roaster.setVerified(request.getIsVerified() != null ? request.getIsVerified() : true);
+        roaster.setIsVerified(request.getIsVerified() != null ? request.getIsVerified() : true);
 
         roaster = roasterRepository.save(roaster);
         log.info("Created roaster: {} with ID: {}", roaster.getName(), roaster.getId());
@@ -180,7 +179,7 @@ public class ImportService {
         }
 
         if (request.getIsVerified() != null) {
-            roaster.setVerified(request.getIsVerified());
+            roaster.setIsVerified(request.getIsVerified());
         }
 
         // Handle logo update
@@ -312,14 +311,14 @@ public class ImportService {
         coffee.setDescription(request.getDescription());
         coffee.setImageUrl(imageUrl);
         coffee.setSubmittedBy(submitter);
-        coffee.setNotes(Set.copyOf(notes));
+        coffee.setNotes(notes);
 
         // Set status based on autoApprove flag
         boolean autoApprove = request.getAutoApprove() != null && request.getAutoApprove();
         if (autoApprove) {
-            coffee.setStatus(CoffeeStatus.APPROVED);
+            coffee.setStatus(Coffee.CoffeeStatus.APPROVED);
         } else {
-            coffee.setStatus(CoffeeStatus.PENDING);
+            coffee.setStatus(Coffee.CoffeeStatus.PENDING);
         }
 
         coffee = coffeeRepository.save(coffee);
@@ -411,7 +410,7 @@ public class ImportService {
                 (request.getNoteNames() != null && !request.getNoteNames().isEmpty())) {
             List<Note> notes = resolveNotes(request);
             if (!notes.isEmpty()) {
-                coffee.setNotes(Set.copyOf(notes));
+                coffee.setNotes(notes);
             }
         }
 
@@ -429,7 +428,7 @@ public class ImportService {
 
         // Handle auto-approve
         if (request.getAutoApprove() != null && request.getAutoApprove() && coffee.isPending()) {
-            coffee.setStatus(CoffeeStatus.APPROVED);
+            coffee.setStatus(Coffee.CoffeeStatus.APPROVED);
         }
 
         coffee = coffeeRepository.save(coffee);

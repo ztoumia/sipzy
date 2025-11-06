@@ -20,15 +20,27 @@ export const metadata = {
 };
 
 export default async function HomePage() {
-  // Récupérer les données côté serveur
-  const popularCoffees = await api.coffees.getPopular(8);
-  const recentReviews = await api.reviews.getRecent(6);
+  // Récupérer les données côté serveur avec gestion d'erreur
+  let popularCoffees = [];
+  let recentReviews = [];
+  let error = null;
+
+  try {
+    popularCoffees = await api.coffees.getPopular(8);
+    recentReviews = await api.reviews.getRecent(6);
+  } catch (err: any) {
+    console.error('[HomePage] Error fetching data:', err.message);
+    error = err.response?.status === 429
+      ? 'Trop de requêtes. Veuillez rafraîchir la page dans quelques instants.'
+      : 'Erreur lors du chargement des données.';
+  }
 
   // Passer les données au Client Component
   return (
     <HomePageClient
       popularCoffees={popularCoffees}
       recentReviews={recentReviews}
+      error={error}
     />
   );
 }
