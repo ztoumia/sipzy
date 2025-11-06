@@ -1,9 +1,9 @@
 import { AdminSidebarProvider } from '@/contexts/AdminSidebarContext';
-import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
-import { TopBar } from '@/components/admin/layout/TopBar';
-import { NavigationLoader } from '@/components/admin/layout/NavigationLoader';
+import { AdminSidebar } from '@/components/layout/AdminSidebar';
+import { TopBar } from '@/components/layout/TopBar';
+import { NavigationLoader } from '@/components/layout/NavigationLoader';
 
-export default function AdminLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;

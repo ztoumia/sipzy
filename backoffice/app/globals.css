@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-serif: 'Playfair Display', serif;
+  
+  /* Coffee colors */
+  --color-coffee-50: #faf7f0;
+  --color-coffee-100: #f3ede0;
+  --color-coffee-200: #e6d8c1;
+  --color-coffee-300: #d4c19e;
+  --color-coffee-400: #c1a67a;
+  --color-coffee-500: #b08b5c;
+  --color-coffee-600: #9a6f4a;
+  --color-coffee-700: #7d573c;
+  --color-coffee-800: #654633;
+  --color-coffee-900: #52382a;
+  --color-coffee-950: #2c1d15;
+  
+  /* Cream colors */
+  --color-cream-50: #fefdfb;
+  --color-cream-100: #fdf9f2;
+  --color-cream-200: #faf1e4;
+  --color-cream-300: #f6e6d0;
+  --color-cream-400: #f0d5b5;
+  --color-cream-500: #e8c196;
+  --color-cream-600: #ddaa73;
+  --color-cream-700: #c8925a;
+  --color-cream-800: #a3754a;
+  --color-cream-900: #83603e;
+  --color-cream-950: #46301f;
+  
+  /* Brown colors */
+  --color-brown-50: #fdf8f6;
+  --color-brown-100: #f2e8e5;
+  --color-brown-200: #eaddd7;
+  --color-brown-300: #e0cdc2;
+  --color-brown-400: #d2bab0;
+  --color-brown-500: #bfa094;
+  --color-brown-600: #a18072;
+  --color-brown-700: #977669;
+  --color-brown-800: #846358;
+  --color-brown-900: #6d4e47;
+  --color-brown-950: #3a2a25;
+  
+  /* Fluid font sizes */
+  --font-size-fluid-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-fluid-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --font-size-fluid-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --font-size-fluid-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --font-size-fluid-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --font-size-fluid-2xl: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --font-size-fluid-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+  --font-size-fluid-4xl: clamp(2.25rem, 1.7rem + 2.75vw, 3.5rem);
+  
+  /* Custom spacing */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-128: 32rem;
+  
+  /* Max widths */
+  --max-width-8xl: 88rem;
+  --max-width-9xl: 96rem;
+  
+  /* Animations */
+  --animate-fade-in: fadeIn 0.5s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-slide-down: slideDown 0.3s ease-out;
+}
+
+/* Base styles */
+body {
+  background-color: white;
+  color: var(--color-coffee-900);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-coffee-500);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(212 193 158) rgb(250 241 228);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background-color: var(--color-cream-100);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: var(--color-coffee-300);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-coffee-400);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from { 
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile improvements */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
