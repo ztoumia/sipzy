@@ -102,16 +102,36 @@ cloudinary:
   api-secret: ${CLOUDINARY_API_SECRET:your_api_secret}
   secure: true
 
-# Rate Limiting Configuration
-rate-limit:
-  auth:
-    register: 3  # requêtes par heure
-    login: 5     # requêtes par minute
-  api:
-    coffees-post: 5   # requêtes par heure
-    reviews-post: 10  # requêtes par heure
-    upload: 20        # requêtes par heure
-    public-get: 100   # requêtes par minute
+# Modern Rate Limiting Configuration (2025 Best Practices)
+# Token Bucket Algorithm with burst support
+# capacity: max tokens (requests) the bucket can hold
+# refill: tokens added per interval
+# interval: time period for refilling
+app:
+  rate-limit:
+    # Anonymous Users (IP-based rate limiting)
+    # Default: 60 requests per minute
+    anonymous-capacity: 60
+    anonymous-refill-tokens: 60
+    anonymous-refill-minutes: 1
+
+    # Authenticated Users (user-based rate limiting)
+    # Default: 600 requests per minute
+    authenticated-capacity: 600
+    authenticated-refill-tokens: 600
+    authenticated-refill-minutes: 1
+
+    # Admin Users (high limit for admin operations)
+    # Default: 3000 requests per minute
+    admin-capacity: 3000
+    admin-refill-tokens: 3000
+    admin-refill-minutes: 1
+
+    # Sensitive Endpoints (login, register, password reset)
+    # Default: 5 requests per minute (strict protection against brute force)
+    sensitive-capacity: 5
+    sensitive-refill-tokens: 5
+    sensitive-refill-minutes: 1
 
 # Logging Configuration
 logging:

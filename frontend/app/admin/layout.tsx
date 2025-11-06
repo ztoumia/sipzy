@@ -1,6 +1,7 @@
 import { AdminSidebarProvider } from '@/contexts/AdminSidebarContext';
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar';
 import { TopBar } from '@/components/admin/layout/TopBar';
+import { NavigationLoader } from '@/components/admin/layout/NavigationLoader';
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,9 @@ export default function AdminLayout({
 }) {
   return (
     <AdminSidebarProvider>
+      {/* Global navigation loading bar */}
+      <NavigationLoader />
+
       <div className="min-h-screen bg-gray-50 flex">
         {/* Sidebar */}
         <AdminSidebar />

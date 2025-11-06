@@ -227,18 +227,50 @@ const CTASection = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
 interface HomePageClientProps {
   popularCoffees: Coffee[];
   recentReviews: Review[];
+  error?: string | null;
 }
 
 // Page d'accueil principale (Client Component)
-export default function HomePageClient({ popularCoffees, recentReviews }: HomePageClientProps) {
+export default function HomePageClient({ popularCoffees, recentReviews, error }: HomePageClientProps) {
   const { isAuthenticated } = useAuth();
 
   return (
     <PageLayout>
       <HeroSection isAuthenticated={isAuthenticated} />
       <StatsSection />
-      <PopularCoffeesSection coffees={popularCoffees} />
-      <RecentReviewsSection reviews={recentReviews} />
+
+      {error ? (
+        <section className="py-16 bg-cream-50">
+          <Container>
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-8">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                    <CoffeeIcon className="w-8 h-8 text-amber-600" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-semibold text-amber-900 mb-2">
+                  Service temporairement ralenti
+                </h3>
+                <p className="text-amber-700 mb-4">{error}</p>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  className="border-amber-600 text-amber-600 hover:bg-amber-50"
+                >
+                  Rafraîchir la page
+                </Button>
+              </div>
+            </div>
+          </Container>
+        </section>
+      ) : (
+        <>
+          <PopularCoffeesSection coffees={popularCoffees} />
+          <RecentReviewsSection reviews={recentReviews} />
+        </>
+      )}
+
       <CTASection isAuthenticated={isAuthenticated} />
     </PageLayout>
   );

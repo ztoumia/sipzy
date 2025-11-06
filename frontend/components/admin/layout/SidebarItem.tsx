@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAdminSidebar } from '@/contexts/AdminSidebarContext';
+import { useState } from 'react';
 
 export interface SidebarItemProps {
   icon: LucideIcon;
@@ -21,14 +22,30 @@ export interface SidebarItemProps {
 export function SidebarItem({ icon: Icon, label, href, badge, onClick, indent = false }: SidebarItemProps) {
   const pathname = usePathname();
   const { isCollapsed, closeMobile } = useAdminSidebar();
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const isActive = pathname === href || pathname.startsWith(href + '/');
+  // Special case: for /admin route, only match exactly
+  // For other routes, match if starts with the href
+  const isActive = href === '/admin'
+    ? pathname === '/admin'
+    : pathname === href || pathname.startsWith(href + '/');
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't show loading if already on the exact same page
+    if (pathname === href) {
+      e.preventDefault();
+      return;
+    }
+
+    setIsNavigating(true);
+
     if (onClick) {
       onClick();
     }
     closeMobile();
+
+    // Reset after a delay (navigation should complete by then)
+    setTimeout(() => setIsNavigating(false), 1000);
   };
 
   const badgeVariantClasses = {
@@ -48,10 +65,15 @@ export function SidebarItem({ icon: Icon, label, href, badge, onClick, indent = 
         isActive
           ? 'bg-blue-500/10 text-blue-600 border-l-4 border-blue-500 pl-2'
           : 'text-gray-700 hover:bg-gray-100 border-l-4 border-transparent',
-        isCollapsed && 'justify-center px-2'
+        isCollapsed && 'justify-center px-2',
+        isNavigating && 'opacity-60'
       )}
     >
-      <Icon className={cn('w-5 h-5 flex-shrink-0', isActive && 'text-blue-600')} />
+      {isNavigating ? (
+        <Loader2 className="w-5 h-5 flex-shrink-0 animate-spin text-blue-600" />
+      ) : (
+        <Icon className={cn('w-5 h-5 flex-shrink-0', isActive && 'text-blue-600')} />
+      )}
 
       {!isCollapsed && (
         <>
