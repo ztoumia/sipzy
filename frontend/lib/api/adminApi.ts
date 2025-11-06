@@ -1,9 +1,7 @@
+import { apiClient } from './apiClient';
 import { Coffee, Report, User } from '@/types';
 
-// Simuler un délai réseau
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Types pour l'admin
+// Types for admin API
 export interface AdminStats {
   totalCoffees: number;
   totalUsers: number;
@@ -28,297 +26,190 @@ export interface ReportAction {
   adminId: number;
 }
 
-// Charger les données depuis le cache global
-let cachedData: {
-  coffees: Coffee[];
-  users: User[];
-  reviews: any[];
-  reports: Report[];
-} | null = null;
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+}
 
-const loadData = async () => {
-  if (cachedData) return cachedData;
-
-  const [coffeesData, usersData, reviewsData] = await Promise.all([
-    import('@/mocks/coffees.json'),
-    import('@/mocks/users.json'),
-    import('@/mocks/reviews.json'),
-  ]);
-
-  cachedData = {
-    coffees: coffeesData.default as Coffee[],
-    users: usersData.default as User[],
-    reviews: reviewsData.default,
-    reports: [], // Pour l'instant, pas de mock de reports
+export interface PageResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
   };
+}
 
-  return cachedData;
-};
+export interface ActivityResponse {
+  id: number;
+  type: 'coffee_submitted' | 'coffee_approved' | 'coffee_rejected' | 'report_created';
+  message: string;
+  timestamp: string;
+  user?: User;
+  coffee?: Coffee;
+}
 
-// API Admin
+// Admin API
 export const adminApi = {
   /**
-   * Récupérer les statistiques du dashboard admin
+   * Get admin dashboard statistics
    */
   async getStats(): Promise<AdminStats> {
-    await delay(300);
-
-    const data = await loadData();
-
-    return {
-      totalCoffees: data.coffees.length,
-      totalUsers: data.users.length,
-      totalReviews: data.reviews.length,
-      pendingCoffees: data.coffees.filter(c => c.status === 'PENDING').length,
-      pendingReports: data.reports.filter(r => r.status === 'PENDING').length,
-      approvedCoffees: data.coffees.filter(c => c.status === 'APPROVED').length,
-      rejectedCoffees: data.coffees.filter(c => c.status === 'REJECTED').length,
-    };
+    const response = await apiClient.get('/api/admin/stats');
+    return response.data.data;
   },
 
   /**
-   * Récupérer les cafés en attente de modération
+   * Get pending coffees for moderation
    */
-  async getPendingCoffees(page = 1, limit = 10): Promise<{
-    data: Coffee[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }> {
-    await delay(400);
-
-    const data = await loadData();
-    const pendingCoffees = data.coffees.filter(c => c.status === 'PENDING');
-
-    // Tri par date de création (plus récent en premier)
-    pendingCoffees.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    const total = pendingCoffees.length;
-    const totalPages = Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    return {
-      data: pendingCoffees.slice(startIndex, endIndex),
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-      },
-    };
+  async getPendingCoffees(page = 1, limit = 10): Promise<PageResponse<Coffee>> {
+    const response = await apiClient.get('/api/admin/coffees/pending', {
+      params: { page, limit },
+    });
+    return response.data;
   },
 
   /**
-   * Approuver un café
+   * Approve a coffee
    */
   async approveCoffee(action: CoffeeModerationAction): Promise<Coffee> {
-    await delay(500);
-
-    const data = await loadData();
-    const coffee = data.coffees.find(c => c.id === action.coffeeId);
-
-    if (!coffee) {
-      throw new Error('Café non trouvé');
-    }
-
-    // Mettre à jour le statut
-    coffee.status = 'APPROVED';
-    coffee.approvedBy = action.adminId;
-    coffee.approvedAt = new Date().toISOString();
-
-    return coffee;
+    const response = await apiClient.put(
+      `/api/admin/coffees/${action.coffeeId}/approve`,
+      { adminNotes: action.adminNotes }
+    );
+    return response.data.data;
   },
 
   /**
-   * Rejeter un café
+   * Reject a coffee
    */
   async rejectCoffee(action: CoffeeModerationAction): Promise<Coffee> {
-    await delay(500);
-
-    const data = await loadData();
-    const coffee = data.coffees.find(c => c.id === action.coffeeId);
-
-    if (!coffee) {
-      throw new Error('Café non trouvé');
-    }
-
-    // Mettre à jour le statut
-    coffee.status = 'REJECTED';
-    coffee.approvedBy = action.adminId;
-    coffee.approvedAt = new Date().toISOString();
-
-    // Stocker les notes admin (en prod, ce serait dans une table séparée)
-    (coffee as any).rejectionReason = action.adminNotes;
-
-    return coffee;
+    const response = await apiClient.put(
+      `/api/admin/coffees/${action.coffeeId}/reject`,
+      { adminNotes: action.adminNotes }
+    );
+    return response.data.data;
   },
 
   /**
-   * Récupérer tous les cafés avec filtres
+   * Get all coffees with filters
    */
-  async getAllCoffees(filters?: {
-    status?: 'PENDING' | 'APPROVED' | 'REJECTED';
-    search?: string;
-  }, page = 1, limit = 20): Promise<{
-    data: Coffee[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }> {
-    await delay(300);
-
-    const data = await loadData();
-    let coffees = [...data.coffees];
-
-    // Appliquer les filtres
-    if (filters?.status) {
-      coffees = coffees.filter(c => c.status === filters.status);
-    }
-
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase();
-      coffees = coffees.filter(c =>
-        c.name.toLowerCase().includes(searchLower) ||
-        c.origin?.toLowerCase().includes(searchLower) ||
-        c.roaster?.name.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Tri par date de création (plus récent en premier)
-    coffees.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    const total = coffees.length;
-    const totalPages = Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    return {
-      data: coffees.slice(startIndex, endIndex),
-      pagination: {
+  async getAllCoffees(
+    filters?: {
+      status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+      search?: string;
+    },
+    page = 1,
+    limit = 20
+  ): Promise<PageResponse<Coffee>> {
+    const response = await apiClient.get('/api/admin/coffees', {
+      params: {
+        status: filters?.status,
+        search: filters?.search,
         page,
         limit,
-        total,
-        totalPages,
       },
-    };
+    });
+    return response.data;
   },
 
   /**
-   * Récupérer les signalements
+   * Get all users
    */
-  async getReports(filters?: {
-    status?: 'PENDING' | 'RESOLVED' | 'DISMISSED';
-  }, page = 1, limit = 20): Promise<{
-    data: Report[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPages: number;
-    };
-  }> {
-    await delay(300);
+  async getAllUsers(page = 1, limit = 20): Promise<PageResponse<User>> {
+    const response = await apiClient.get('/api/admin/users', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
 
-    const data = await loadData();
-    let reports = [...data.reports];
+  /**
+   * Ban a user
+   */
+  async banUser(userId: number, reason?: string): Promise<User> {
+    const response = await apiClient.put(`/api/admin/users/${userId}/ban`, {
+      reason,
+    });
+    return response.data.data;
+  },
 
-    // Appliquer les filtres
-    if (filters?.status) {
-      reports = reports.filter(r => r.status === filters.status);
-    }
+  /**
+   * Unban a user
+   */
+  async unbanUser(userId: number): Promise<User> {
+    const response = await apiClient.put(`/api/admin/users/${userId}/unban`);
+    return response.data.data;
+  },
 
-    // Tri par date de création (plus récent en premier)
-    reports.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  /**
+   * Get pending reports
+   */
+  async getPendingReports(page = 1, limit = 10): Promise<PageResponse<Report>> {
+    const response = await apiClient.get('/api/admin/reports/pending', {
+      params: { page, limit },
+    });
+    return response.data;
+  },
 
-    const total = reports.length;
-    const totalPages = Math.ceil(total / limit);
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    return {
-      data: reports.slice(startIndex, endIndex),
-      pagination: {
+  /**
+   * Get all reports with filters
+   */
+  async getReports(
+    filters?: {
+      status?: 'PENDING' | 'RESOLVED' | 'DISMISSED';
+    },
+    page = 1,
+    limit = 20
+  ): Promise<PageResponse<Report>> {
+    const response = await apiClient.get('/api/admin/reports', {
+      params: {
+        status: filters?.status,
         page,
         limit,
-        total,
-        totalPages,
       },
-    };
+    });
+    return response.data;
   },
 
   /**
-   * Traiter un signalement
+   * Resolve a report (action was taken)
+   */
+  async resolveReport(reportId: number, adminNotes?: string): Promise<Report> {
+    const response = await apiClient.put(`/api/admin/reports/${reportId}/resolve`, {
+      adminNotes,
+    });
+    return response.data.data;
+  },
+
+  /**
+   * Dismiss a report (no action needed)
+   */
+  async dismissReport(reportId: number, adminNotes?: string): Promise<Report> {
+    const response = await apiClient.put(`/api/admin/reports/${reportId}/dismiss`, {
+      adminNotes,
+    });
+    return response.data.data;
+  },
+
+  /**
+   * Handle report (generic method for backward compatibility)
    */
   async handleReport(action: ReportAction): Promise<Report> {
-    await delay(500);
-
-    const data = await loadData();
-    const report = data.reports.find(r => r.id === action.reportId);
-
-    if (!report) {
-      throw new Error('Signalement non trouvé');
+    if (action.action === 'RESOLVED') {
+      return this.resolveReport(action.reportId, action.adminNotes);
+    } else {
+      return this.dismissReport(action.reportId, action.adminNotes);
     }
-
-    // Mettre à jour le statut
-    report.status = action.action;
-    report.resolvedBy = action.adminId;
-    report.resolvedAt = new Date().toISOString();
-    report.adminNotes = action.adminNotes;
-
-    return report;
   },
 
   /**
-   * Récupérer les activités récentes pour le dashboard
+   * Get recent activity for dashboard
    */
-  async getRecentActivity(limit = 10): Promise<Array<{
-    id: number;
-    type: 'coffee_submitted' | 'coffee_approved' | 'coffee_rejected' | 'report_created';
-    message: string;
-    timestamp: string;
-    user?: User;
-    coffee?: Coffee;
-  }>> {
-    await delay(200);
-
-    const data = await loadData();
-
-    // Créer des activités basées sur les données
-    const activities: Array<any> = [];
-
-    // Cafés récents
-    data.coffees
-      .filter(c => c.status === 'PENDING')
-      .slice(0, 5)
-      .forEach(coffee => {
-        activities.push({
-          id: coffee.id,
-          type: 'coffee_submitted',
-          message: `Nouveau café proposé : ${coffee.name}`,
-          timestamp: coffee.createdAt,
-          coffee,
-          user: coffee.submittedByUser,
-        });
-      });
-
-    // Trier par date (plus récent en premier)
-    activities.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-
-    return activities.slice(0, limit);
+  async getRecentActivity(limit = 10): Promise<ActivityResponse[]> {
+    const response = await apiClient.get('/api/admin/activity', {
+      params: { limit },
+    });
+    return response.data.data;
   },
 };

@@ -18,14 +18,11 @@ interface AdminSidebarContextType {
   closeMobile: () => void;
   pendingCounts: PendingCounts;
   updatePendingCounts: (counts: Partial<PendingCounts>) => void;
-  expandedGroups: Record<string, boolean>;
-  toggleGroup: (groupId: string) => void;
 }
 
 const AdminSidebarContext = createContext<AdminSidebarContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'admin-sidebar-state';
-const GROUPS_STORAGE_KEY = 'admin-sidebar-groups';
 
 export function AdminSidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -35,11 +32,6 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
     reports: 0,
     users: 0,
   });
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    coffees: true,
-    users: true,
-    reports: true,
-  });
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -47,11 +39,6 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         setIsCollapsed(JSON.parse(stored));
-      }
-
-      const storedGroups = localStorage.getItem(GROUPS_STORAGE_KEY);
-      if (storedGroups) {
-        setExpandedGroups(JSON.parse(storedGroups));
       }
     } catch (error) {
       console.error('Failed to load sidebar state:', error);
@@ -67,13 +54,6 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const saveGroups = (groups: Record<string, boolean>) => {
-    try {
-      localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(groups));
-    } catch (error) {
-      console.error('Failed to save groups state:', error);
-    }
-  };
 
   const toggle = () => {
     setIsCollapsed(prev => {
@@ -105,14 +85,6 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
     setPendingCounts(prev => ({ ...prev, ...counts }));
   }, []);
 
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups(prev => {
-      const newGroups = { ...prev, [groupId]: !prev[groupId] };
-      saveGroups(newGroups);
-      return newGroups;
-    });
-  };
-
   return (
     <AdminSidebarContext.Provider
       value={{
@@ -125,8 +97,6 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
         closeMobile,
         pendingCounts,
         updatePendingCounts,
-        expandedGroups,
-        toggleGroup,
       }}
     >
       {children}
