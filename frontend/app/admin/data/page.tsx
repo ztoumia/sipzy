@@ -27,10 +27,17 @@ export default function DataManagementPage() {
 
   // Charger les métadonnées des entités
   useEffect(() => {
-    if (user && user.role === 'ADMIN') {
+    let isMounted = true;
+
+    if (user && user.role === 'ADMIN' && isMounted) {
       loadEntities();
     }
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.role]); // Only re-run if user ID or role changes
 
   const loadEntities = async () => {
     setIsLoading(true);

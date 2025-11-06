@@ -39,6 +39,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        // Skip rate limiting for admin endpoints
+        String requestPath = request.getRequestURI();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (requestPath.startsWith("/api/admin/") && isAdmin(authentication)) {
+            // Admin users are exempt from rate limiting on admin endpoints
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Get rate limit key (IP for anonymous, userId for authenticated)
         String rateLimitKey = getRateLimitKey(request);
 
@@ -60,6 +70,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     request.getRequestURI() + "\"}"
             );
         }
+    }
+
+    /**
+     * Check if the current authentication is an admin
+     */
+    private boolean isAdmin(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
     }
 
     /**

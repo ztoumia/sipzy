@@ -42,13 +42,33 @@ export default function EntityTablePage() {
     }
   }, [user, authLoading, router]);
 
-  // Charger les métadonnées et les données
+  // Charger les métadonnées (une seule fois)
   useEffect(() => {
-    if (user && user.role === 'ADMIN') {
+    let isMounted = true;
+
+    if (user && user.role === 'ADMIN' && isMounted) {
       loadMetadata();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.role, entityType]);
+
+  // Charger les données (quand les paramètres changent)
+  useEffect(() => {
+    let isMounted = true;
+
+    if (user && user.role === 'ADMIN' && metadata && isMounted) {
       loadData();
     }
-  }, [user, entityType, currentPage, pageSize, sortBy, sortDirection]);
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, entityType, currentPage, pageSize, sortBy, sortDirection, metadata?.name]);
 
   const loadMetadata = async () => {
     try {

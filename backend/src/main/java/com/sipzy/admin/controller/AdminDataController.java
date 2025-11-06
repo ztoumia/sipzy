@@ -2,6 +2,7 @@ package com.sipzy.admin.controller;
 
 import com.sipzy.admin.dto.EntityMetadata;
 import com.sipzy.admin.service.AdminDataService;
+import com.sipzy.common.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,10 @@ public class AdminDataController {
      * GET /api/admin/data/metadata
      */
     @GetMapping("/metadata")
-    public ResponseEntity<List<EntityMetadata>> getEntityMetadata() {
+    public ResponseEntity<ApiResponse<List<EntityMetadata>>> getEntityMetadata() {
         log.info("Getting entity metadata");
         List<EntityMetadata> metadata = adminDataService.getEntityMetadataList();
-        return ResponseEntity.ok(metadata);
+        return ResponseEntity.ok(ApiResponse.success(metadata));
     }
 
     /**
@@ -57,13 +58,13 @@ public class AdminDataController {
      * GET /api/admin/data/{entityType}/{id}
      */
     @GetMapping("/{entityType}/{id}")
-    public ResponseEntity<Object> getEntityById(
+    public ResponseEntity<ApiResponse<Object>> getEntityById(
             @PathVariable String entityType,
             @PathVariable Long id
     ) {
         log.info("Getting {} with id: {}", entityType, id);
         Object entity = adminDataService.getEntityById(entityType, id);
-        return ResponseEntity.ok(entity);
+        return ResponseEntity.ok(ApiResponse.success(entity));
     }
 
     /**
@@ -71,14 +72,14 @@ public class AdminDataController {
      * PUT /api/admin/data/{entityType}/{id}
      */
     @PutMapping("/{entityType}/{id}")
-    public ResponseEntity<Object> updateEntity(
+    public ResponseEntity<ApiResponse<Object>> updateEntity(
             @PathVariable String entityType,
             @PathVariable Long id,
             @RequestBody Map<String, Object> updates
     ) {
         log.info("Updating {} with id: {}", entityType, id);
         Object updated = adminDataService.updateEntity(entityType, id, updates);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(ApiResponse.success(updated));
     }
 
     /**
