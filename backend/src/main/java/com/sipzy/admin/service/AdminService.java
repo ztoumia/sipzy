@@ -11,7 +11,6 @@ import com.sipzy.admin.mapper.ReportMapper;
 import com.sipzy.admin.repository.ActivityRepository;
 import com.sipzy.admin.repository.ReportRepository;
 import com.sipzy.coffee.domain.Coffee;
-import com.sipzy.coffee.domain.CoffeeStatus;
 import com.sipzy.coffee.dto.response.CoffeeResponse;
 import com.sipzy.coffee.mapper.CoffeeMapper;
 import com.sipzy.coffee.repository.CoffeeRepository;
@@ -62,11 +61,11 @@ public class AdminService {
         int totalUsers = (int) userRepository.count();
         int totalReviews = (int) reviewRepository.count();
 
-        int pendingCoffees = (int) coffeeRepository.findByStatus(CoffeeStatus.PENDING, Pageable.unpaged())
+        int pendingCoffees = (int) coffeeRepository.findByStatus(Coffee.CoffeeStatus.PENDING, Pageable.unpaged())
             .getTotalElements();
-        int approvedCoffees = (int) coffeeRepository.findByStatus(CoffeeStatus.APPROVED, Pageable.unpaged())
+        int approvedCoffees = (int) coffeeRepository.findByStatus(Coffee.CoffeeStatus.APPROVED, Pageable.unpaged())
             .getTotalElements();
-        int rejectedCoffees = (int) coffeeRepository.findByStatus(CoffeeStatus.REJECTED, Pageable.unpaged())
+        int rejectedCoffees = (int) coffeeRepository.findByStatus(Coffee.CoffeeStatus.REJECTED, Pageable.unpaged())
             .getTotalElements();
 
         int pendingReports = (int) reportRepository.countByStatus(ReportStatus.PENDING);
@@ -86,7 +85,7 @@ public class AdminService {
         log.info("Getting pending coffees - page: {}, limit: {}", page, limit);
 
         Pageable pageable = PageRequest.of(page - 1, limit);
-        Page<Coffee> coffeePage = coffeeRepository.findByStatus(CoffeeStatus.PENDING, pageable);
+        Page<Coffee> coffeePage = coffeeRepository.findByStatus(Coffee.CoffeeStatus.PENDING, pageable);
 
         List<CoffeeResponse> coffees = coffeePage.getContent().stream()
             .map(coffeeMapper::toCoffeeResponse)
@@ -117,7 +116,7 @@ public class AdminService {
 
         if (status != null && !status.isEmpty()) {
             try {
-                CoffeeStatus coffeeStatus = CoffeeStatus.valueOf(status.toUpperCase());
+                Coffee.CoffeeStatus coffeeStatus = Coffee.CoffeeStatus.valueOf(status.toUpperCase());
                 coffeePage = coffeeRepository.findByStatus(coffeeStatus, pageable);
             } catch (IllegalArgumentException e) {
                 // Invalid status, return all
