@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 interface PendingCounts {
   coffees: number;
@@ -101,9 +101,9 @@ export function AdminSidebarProvider({ children }: { children: ReactNode }) {
     setIsMobileOpen(false);
   };
 
-  const updatePendingCounts = (counts: Partial<PendingCounts>) => {
+  const updatePendingCounts = useCallback((counts: Partial<PendingCounts>) => {
     setPendingCounts(prev => ({ ...prev, ...counts }));
-  };
+  }, []);
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups(prev => {
