@@ -8,14 +8,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Coffee, ArrowLeft, Plus } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { ImageUpload } from '@/components/ui/ImageUpload';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
+import { Card, CardContent, CardHeader, CardTitle } from '@sipzy/shared/components/ui/Card';
+import { ImageUpload } from '@sipzy/shared/components/ui/ImageUpload';
 import api from '@/lib/api/realApi';
-import { Roaster, Note } from '@/types';
+import { Roaster, Note } from '@sipzy/shared/types';
 import { useToast } from '@/hooks/useToast';
-import { addCoffeeSchema, type AddCoffeeInput } from '@/lib/validation/schemas';
+import { addCoffeeSchema, type AddCoffeeInput } from '@sipzy/shared/lib/validation/schemas';
 
 export default function NewCoffeePage() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function NewCoffeePage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<AddCoffeeInput>({
-    resolver: zodResolver(addCoffeeSchema),
+    resolver: zodResolver(addCoffeeSchema) as any,
     defaultValues: {
       name: '',
       roasterId: '' as any,

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 

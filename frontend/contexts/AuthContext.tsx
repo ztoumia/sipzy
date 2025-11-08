@@ -2,10 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api/realApi';
-import { setAuthToken, removeAuthToken, getErrorMessage } from '@/lib/api/apiClient';
-import type { UserResponse } from '@/lib/types/api';
+import { setAuthToken, removeAuthToken, getErrorMessage } from '@sipzy/shared/lib/api/apiClient';
 
-// Map UserResponse to frontend User type
+// User type for frontend
 interface User {
   id: number;
   username: string;

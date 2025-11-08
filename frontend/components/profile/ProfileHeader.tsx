@@ -4,8 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Shield, Edit } from 'lucide-react';
-import { User } from '@/types';
-import { Button } from '@/components/ui/Button';
+import { User } from '@sipzy/shared/types';
+import { Button } from '@sipzy/shared/components/ui/Button';
 
 interface ProfileHeaderProps {
   user: User;
@@ -51,7 +51,9 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   {user.username}
                   {user.role === 'ADMIN' && (
-                    <Shield className="w-5 h-5 text-coffee-600" title="Administrateur" />
+                    <span title="Administrateur">
+                      <Shield className="w-5 h-5 text-coffee-600" />
+                    </span>
                   )}
                 </h1>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">

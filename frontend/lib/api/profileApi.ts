@@ -1,4 +1,4 @@
-import { User, Review, Coffee, UserProfileForm } from '@/types';
+import { User, Review, Coffee, UserProfileForm } from '@sipzy/shared/types';
 import api from './realApi';
 
 /**
@@ -51,7 +51,8 @@ class ProfileApi {
         role: userResponse.role as 'USER' | 'ADMIN',
         avatarUrl: userResponse.avatarUrl,
         bio: userResponse.bio,
-        isVerified: userResponse.emailVerified,
+        isActive: userResponse.isActive,
+        emailVerified: userResponse.emailVerified,
         createdAt: userResponse.createdAt,
         updatedAt: userResponse.updatedAt,
       };
@@ -64,7 +65,7 @@ class ProfileApi {
       };
 
       // Map recent reviews
-      const recentReviews: Review[] = profileData.recentReviews.map(r => ({
+      const recentReviews: Review[] = profileData.recentReviews.map((r: any) => ({
         id: r.id,
         coffeeId: r.coffee.id,
         userId: r.user.id,
@@ -72,12 +73,14 @@ class ProfileApi {
         comment: r.comment,
         imageUrl: r.imageUrl,
         helpfulCount: r.helpfulVotes,
+        notHelpfulCount: r.notHelpfulVotes || 0,
+        isFlagged: r.isFlagged || false,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
       }));
 
       // Map approved coffees
-      const approvedCoffees: Coffee[] = profileData.approvedCoffees.map(c => ({
+      const approvedCoffees: Coffee[] = profileData.approvedCoffees.map((c: any) => ({
         id: c.id,
         name: c.name,
         roasterId: c.roaster.id,
@@ -89,9 +92,9 @@ class ProfileApi {
         process: c.process,
         description: c.description,
         imageUrl: c.imageUrl,
-        notes: c.notes.map(n => n.name),
-        averageRating: c.averageRating,
-        totalReviews: c.totalReviews,
+        notes: c.notes.map((n: any) => n.name),
+        avgRating: c.averageRating,
+        reviewCount: c.totalReviews,
         status: c.status as 'PENDING' | 'APPROVED' | 'REJECTED',
         submittedBy: userResponse.id,
         createdAt: c.createdAt,
@@ -120,7 +123,7 @@ class ProfileApi {
       const reviewsPage = await api.users.getReviews(userResponse.id, { page, limit });
 
       // Map to frontend Review type
-      return reviewsPage.data.map(r => ({
+      return reviewsPage.data.map((r: any) => ({
         id: r.id,
         coffeeId: r.coffee.id,
         userId: r.user.id,
@@ -128,6 +131,8 @@ class ProfileApi {
         comment: r.comment,
         imageUrl: r.imageUrl,
         helpfulCount: r.helpfulVotes,
+        notHelpfulCount: r.notHelpfulVotes || 0,
+        isFlagged: r.isFlagged || false,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
       }));
@@ -147,7 +152,7 @@ class ProfileApi {
       const coffeesPage = await api.users.getCoffees(userResponse.id, { page, limit });
 
       // Map to frontend Coffee type
-      return coffeesPage.data.map(c => ({
+      return coffeesPage.data.map((c: any) => ({
         id: c.id,
         name: c.name,
         roasterId: c.roaster.id,
@@ -159,9 +164,9 @@ class ProfileApi {
         process: c.process,
         description: c.description,
         imageUrl: c.imageUrl,
-        notes: c.notes.map(n => n.name),
-        averageRating: c.averageRating,
-        totalReviews: c.totalReviews,
+        notes: c.notes.map((n: any) => n.name),
+        avgRating: c.averageRating,
+        reviewCount: c.totalReviews,
         status: c.status as 'PENDING' | 'APPROVED' | 'REJECTED',
         submittedBy: userResponse.id,
         createdAt: c.createdAt,
@@ -193,7 +198,8 @@ class ProfileApi {
         role: userResponse.role as 'USER' | 'ADMIN',
         avatarUrl: userResponse.avatarUrl,
         bio: userResponse.bio,
-        isVerified: userResponse.emailVerified,
+        isActive: userResponse.isActive,
+        emailVerified: userResponse.emailVerified,
         createdAt: userResponse.createdAt,
         updatedAt: userResponse.updatedAt,
       };

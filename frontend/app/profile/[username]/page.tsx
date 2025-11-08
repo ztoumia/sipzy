@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Coffee as CoffeeIcon, MessageSquare } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
@@ -9,7 +10,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileStats } from '@/components/profile/ProfileStats';
 import { CoffeeCard } from '@/components/CoffeeCard';
 import { ReviewCard } from '@/components/ReviewCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { profileApi, UserProfile } from '@/lib/api/profileApi';
 
@@ -59,7 +60,9 @@ export default function UserProfilePage() {
             <p className="text-gray-600 mb-6">
               L'utilisateur @{username} n'existe pas ou a été supprimé.
             </p>
-            <Button href="/">Retour à l'accueil</Button>
+            <Link href="/">
+              <Button>Retour à l'accueil</Button>
+            </Link>
           </div>
         </Container>
       </PageLayout>
@@ -126,12 +129,11 @@ export default function UserProfilePage() {
                       ))}
                       {profile.stats.totalReviews > profile.recentReviews.length && (
                         <div className="text-center pt-4">
-                          <Button
-                            href={`/profile/${username}/reviews`}
-                            variant="outline"
-                          >
-                            Voir tous les avis
-                          </Button>
+                          <Link href={`/profile/${username}/reviews`}>
+                            <Button variant="outline">
+                              Voir tous les avis
+                            </Button>
+                          </Link>
                         </div>
                       )}
                     </>
@@ -150,9 +152,11 @@ export default function UserProfilePage() {
                           : "Aucun café soumis pour l'instant"}
                       </p>
                       {isOwnProfile && (
-                        <Button href="/coffees/new" className="mt-4">
-                          Soumettre un café
-                        </Button>
+                        <Link href="/coffees/new">
+                          <Button className="mt-4">
+                            Soumettre un café
+                          </Button>
+                        </Link>
                       )}
                     </div>
                   ) : (
@@ -164,12 +168,11 @@ export default function UserProfilePage() {
                       </div>
                       {profile.stats.totalCoffeesSubmitted > profile.approvedCoffees.length && (
                         <div className="text-center pt-6">
-                          <Button
-                            href={`/profile/${username}/coffees`}
-                            variant="outline"
-                          >
-                            Voir tous les cafés
-                          </Button>
+                          <Link href={`/profile/${username}/coffees`}>
+                            <Button variant="outline">
+                              Voir tous les cafés
+                            </Button>
+                          </Link>
                         </div>
                       )}
                     </>

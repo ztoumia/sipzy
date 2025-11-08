@@ -103,7 +103,7 @@ services:
       SERVER_PORT: 8080
 
       # CORS Configuration
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://frontend:3000,http://localhost:3001,http://backoffice:3001}
     volumes:
       - backend-logs:/app/logs
     ports:
@@ -149,6 +149,46 @@ services:
       - sipzy-network
     healthcheck:
       test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ========================================
+  # Backoffice Admin (Next.js)
+  # ========================================
+  backoffice:
+    build:
+      context: ./backoffice
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
+        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    image: ${DOCKER_REGISTRY:-ztoumia}/sipzy-backoffice:${BACKOFFICE_VERSION:-latest}
+    container_name: sipzy-backoffice
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      # API Configuration
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8080}
+      NEXT_PUBLIC_APP_NAME: Sipzy Admin
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://frontend:3000}
+
+      # Node Environment
+      NODE_ENV: production
+
+      # Next.js Configuration
+      NEXT_TELEMETRY_DISABLED: 1
+      PORT: 3001
+      HOSTNAME: "0.0.0.0"
+    ports:
+      - "${BACKOFFICE_PORT:-3001}:3001"
+    networks:
+      - sipzy-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3001', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
       interval: 30s
       timeout: 10s
       retries: 3

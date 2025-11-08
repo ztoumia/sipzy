@@ -3,7 +3,6 @@ import type { NextRequest } from 'next/server';
 
 // Routes qui nécessitent une authentification
 const protectedRoutes = [
-  '/admin',
   '/profile/edit',
   '/profile/submissions',
   '/coffees/new',

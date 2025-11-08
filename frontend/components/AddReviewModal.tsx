@@ -3,13 +3,13 @@
 import React, { useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { StarRating } from '@/components/ui/StarRating';
-import { ImageUpload } from '@/components/ui/ImageUpload';
+import { ImageUpload } from '@sipzy/shared/components/ui/ImageUpload';
 import api from '@/lib/api/realApi';
-import { User } from '@/types';
+import { User } from '@sipzy/shared/types';
 import { useToast } from '@/hooks/useToast';
-import { addReviewSchema, type AddReviewInput } from '@/lib/validation/schemas';
+import { addReviewSchema, type AddReviewInput } from '@sipzy/shared/lib/validation/schemas';
 
 interface AddReviewModalProps {
   coffeeId: number;

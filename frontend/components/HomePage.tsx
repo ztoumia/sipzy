@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { Search, Coffee as CoffeeIcon, Star, Users, TrendingUp, ArrowRight } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
 import { CoffeeCard } from '@/components/CoffeeCard';
 import { ReviewCard } from '@/components/ReviewCard';
-import { Coffee, Review } from '@/types';
+import { Coffee, Review } from '@sipzy/shared/types';
 import { useAuth } from '@/hooks/useAuth';
 
 // Composant pour la section Hero

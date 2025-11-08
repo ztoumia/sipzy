@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { CoffeeCard } from '@/components/CoffeeCard';
 import { FiltersPanel } from '@/components/coffees/FiltersPanel';
 import { useCoffeeFilters } from '@/hooks/useCoffeeFilters';
 import api from '@/lib/api/realApi';
-import { Coffee, Note, Roaster } from '@/types';
+import { Coffee, Note, Roaster } from '@sipzy/shared/types';
 
-export default function CoffeesPage() {
+function CoffeesPageContent() {
   const {
     filters,
     updateFilter,
@@ -366,5 +366,26 @@ export default function CoffeesPage() {
         </div>
       )}
     </PageLayout>
+  );
+}
+
+export default function CoffeesPage() {
+  return (
+    <Suspense fallback={
+      <PageLayout>
+        <div className="bg-cream-50 py-8">
+          <Container>
+            <div className="text-center py-12">
+              <div className="text-coffee-400 mb-4">
+                <Search className="h-12 w-12 mx-auto animate-pulse" />
+              </div>
+              <p className="text-coffee-600">Chargement...</p>
+            </div>
+          </Container>
+        </div>
+      </PageLayout>
+    }>
+      <CoffeesPageContent />
+    </Suspense>
   );
 }

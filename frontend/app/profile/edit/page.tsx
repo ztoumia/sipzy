@@ -8,12 +8,12 @@ import Image from 'next/image';
 import { Camera, X } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
 import { profileApi, UserPreferences } from '@/lib/api/profileApi';
-import { updateProfileSchema, type UpdateProfileInput } from '@/lib/validation/schemas';
+import { updateProfileSchema, type UpdateProfileInput } from '@sipzy/shared/lib/validation/schemas';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -114,7 +114,8 @@ export default function EditProfilePage() {
 
       // Mettre à jour le profil
       const updatedUser = await profileApi.updateProfile({
-        ...data,
+        username: data.username || user?.username || '',
+        bio: data.bio,
         avatarUrl,
       });
 
@@ -189,7 +190,7 @@ export default function EditProfilePage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-coffee-600 text-3xl font-bold">
-                        {watchedUsername.charAt(0).toUpperCase()}
+                        {watchedUsername ? watchedUsername.charAt(0).toUpperCase() : 'U'}
                       </div>
                     )}
                   </div>

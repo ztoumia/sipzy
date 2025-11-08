@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Coffee, Home } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { Container } from '@/components/layout/Container';
 
 export default function NotFound() {
