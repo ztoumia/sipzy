@@ -63,7 +63,7 @@ export const adminApi = {
    */
   async getPendingCoffees(page: number = 1, size: number = 10): Promise<PaginatedResponse<Coffee>> {
     const response = await apiClient.get<PaginatedResponse<Coffee>>('/api/admin/coffees/pending', {
-      params: { page: page - 1, size },
+      params: { page, limit: size },
     });
     return response.data;
   },
@@ -79,8 +79,8 @@ export const adminApi = {
   ): Promise<PaginatedResponse<Coffee>> {
     const response = await apiClient.get<PaginatedResponse<Coffee>>('/api/admin/coffees', {
       params: {
-        page: page - 1,
-        size,
+        page,
+        limit: size,
         status,
         search,
       },
@@ -98,8 +98,8 @@ export const adminApi = {
   ): Promise<PaginatedResponse<Coffee>> {
     const response = await apiClient.get<PaginatedResponse<Coffee>>('/api/admin/coffees', {
       params: {
-        page: page - 1,
-        size,
+        page,
+        limit: size,
         status: filters.status,
         search: filters.search,
       },
@@ -152,8 +152,8 @@ export const adminApi = {
   ): Promise<PaginatedResponse<ActivityLog>> {
     const response = await apiClient.get<PaginatedResponse<ActivityLog>>('/api/admin/activity', {
       params: {
-        page: page - 1,
-        size,
+        page,
+        limit: size,
         type,
       },
     });
@@ -179,8 +179,8 @@ export const adminApi = {
   ): Promise<PaginatedResponse<any>> {
     const response = await apiClient.get('/api/admin/users', {
       params: {
-        page: page - 1,
-        size,
+        page,
+        limit: size,
         search,
         role,
       },
@@ -227,8 +227,8 @@ export const adminApi = {
   ): Promise<PaginatedResponse<any>> {
     const response = await apiClient.get('/api/admin/reports', {
       params: {
-        page: page - 1,
-        size,
+        page,
+        limit: size,
         status,
         type,
       },

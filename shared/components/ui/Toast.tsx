@@ -3,8 +3,8 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
-import { Toast as ToastType } from '@/contexts/ToastContext';
-import { cn } from '@sipzy/shared/lib/utils';
+import { Toast as ToastType } from '../../types';
+import { cn } from '../../lib/utils';
 
 interface ToastProps {
   toast: ToastType;

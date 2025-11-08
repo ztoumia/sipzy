@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@sipzy/shared/components/ui/Button';
 import { StarRating } from '@/components/ui/StarRating';
-import { ImageUpload } from '@/components/ui/ImageUpload';
+import { ImageUpload } from '@sipzy/shared/components/ui/ImageUpload';
 import api from '@/lib/api/realApi';
 import { User } from '@sipzy/shared/types';
 import { useToast } from '@/hooks/useToast';

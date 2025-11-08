@@ -1,16 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
-
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-export interface Toast {
-  id: string;
-  type: ToastType;
-  title: string;
-  message?: string;
-  duration?: number;
-}
+import type { Toast, ToastType } from '@sipzy/shared/types';
 
 interface ToastContextType {
   toasts: Toast[];

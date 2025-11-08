@@ -6,7 +6,7 @@ import { Search, Menu, X, LogOut, Coffee, Heart, User, FileText, Shield, LayoutD
 import { Button } from '@sipzy/shared/components/ui/Button';
 import { Input } from '@sipzy/shared/components/ui/Input';
 import { Avatar } from '@sipzy/shared/components/ui/Avatar';
-import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/DropdownMenu';
+import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@sipzy/shared/components/ui/DropdownMenu';
 
 interface HeaderProps {
   user?: {

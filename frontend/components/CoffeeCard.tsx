@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Coffee as CoffeeIcon } from 'lucide-react';
 import { Coffee } from '@sipzy/shared/types';
-import { Card, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@sipzy/shared/components/ui/Card';
 import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { StarRating } from '@/components/ui/StarRating';
 import { FavoriteButton } from '@/components/FavoriteButton';

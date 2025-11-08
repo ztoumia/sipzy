@@ -9,11 +9,14 @@
     "./lib/utils": "./lib/utils.ts",
     "./lib/api/apiClient": "./lib/api/apiClient.ts",
     "./lib/validation/schemas": "./lib/validation/schemas.ts",
+    "./contexts/ToastContext": "./contexts/ToastContext.tsx",
     "./components/ui/*": "./components/ui/*.tsx"
   },
   "dependencies": {
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.553.0",
     "tailwind-merge": "^2.6.0",
     "zod": "^3.24.1"
   },

@@ -9,7 +9,7 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
 import { Button } from '@sipzy/shared/components/ui/Button';
 import { Input } from '@sipzy/shared/components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@sipzy/shared/components/ui/Card';
 import { useToast } from '@/hooks/useToast';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@sipzy/shared/lib/validation/schemas';
 

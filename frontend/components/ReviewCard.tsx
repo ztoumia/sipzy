@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { Flag, MoreHorizontal } from 'lucide-react';
 import { Review } from '@sipzy/shared/types';
-import { Card, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@sipzy/shared/components/ui/Card';
 import { Avatar } from '@sipzy/shared/components/ui/Avatar';
 import { StarRating } from '@/components/ui/StarRating';
 import { Button } from '@sipzy/shared/components/ui/Button';

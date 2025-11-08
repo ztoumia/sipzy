@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Coffee as CoffeeIcon, MapPin, CheckCircle, XCircle, FileText } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@sipzy/shared/components/ui/Card';
 import { Button } from '@sipzy/shared/components/ui/Button';
 import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { Coffee } from '@sipzy/shared/types';

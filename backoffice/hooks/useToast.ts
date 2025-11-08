@@ -1,3 +1,3 @@
 'use client';
 
-export { useToast } from '@/contexts/ToastContext';
+export { useToast } from '@sipzy/shared/contexts/ToastContext';

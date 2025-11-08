@@ -251,3 +251,17 @@ export interface ErrorResponse {
   timestamp: string;
   validationErrors?: Record<string, string>;
 }
+
+// ===================================
+// TOAST TYPES
+// ===================================
+
+export type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+export interface Toast {
+  id: string;
+  type: ToastType;
+  title: string;
+  message?: string;
+  duration?: number;
+}

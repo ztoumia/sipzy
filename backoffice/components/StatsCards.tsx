@@ -1,6 +1,6 @@
 import React from 'react';
 import { Coffee, Users, MessageCircle, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@sipzy/shared/components/ui/Card';
 import { AdminStats } from '@/lib/api/adminApi';
 
 interface StatsCardsProps {

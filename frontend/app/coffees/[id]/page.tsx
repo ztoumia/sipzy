@@ -16,7 +16,7 @@ import { Container } from '@/components/layout/Container';
 import { Button } from '@sipzy/shared/components/ui/Button';
 import AddReviewButton from '@/components/AddReviewButton';
 import { Badge } from '@sipzy/shared/components/ui/Badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@sipzy/shared/components/ui/Card';
 import { StarRating } from '@/components/ui/StarRating';
 import { ReviewCard } from '@/components/ReviewCard';
 import { CoffeeCard } from '@/components/CoffeeCard';

@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ToastProvider, useToast } from '@/contexts/ToastContext';
-import { ToastContainer } from '@/components/ui/Toast';
+import { ToastProvider, useToast } from '@sipzy/shared/contexts/ToastContext';
+import { ToastContainer } from '@sipzy/shared/components/ui/Toast';
 
 function ToastWrapper({ children }: { children: React.ReactNode }) {
   const { toasts, hideToast } = useToast();
