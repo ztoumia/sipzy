@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -8,14 +8,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Coffee, ArrowLeft } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/useToast';
-import { loginSchema, type LoginInput } from '@/lib/validation/schemas';
+import { loginSchema, type LoginInput } from '@sipzy/shared/lib/validation/schemas';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -220,5 +220,27 @@ export default function LoginPage() {
         </Container>
       </div>
     </PageLayout>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <PageLayout>
+        <div className="bg-cream-50 py-8">
+          <Container size="sm">
+            <div className="max-w-md mx-auto">
+              <Card>
+                <CardContent className="p-8">
+                  <div className="text-center text-coffee-600">Chargement...</div>
+                </CardContent>
+              </Card>
+            </div>
+          </Container>
+        </div>
+      </PageLayout>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }

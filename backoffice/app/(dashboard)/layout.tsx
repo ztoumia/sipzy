@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { AdminSidebarProvider } from '@/contexts/AdminSidebarContext';
 import { AdminSidebar } from '@/components/layout/AdminSidebar';
 import { TopBar } from '@/components/layout/TopBar';
@@ -11,7 +12,9 @@ export default function DashboardLayout({
   return (
     <AdminSidebarProvider>
       {/* Global navigation loading bar */}
-      <NavigationLoader />
+      <Suspense fallback={null}>
+        <NavigationLoader />
+      </Suspense>
 
       <div className="min-h-screen bg-gray-50 flex">
         {/* Sidebar */}

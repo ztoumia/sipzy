@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { X, SlidersHorizontal, Star } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { CoffeeFilters } from '@/hooks/useCoffeeFilters';
 
 interface FiltersPanelProps {

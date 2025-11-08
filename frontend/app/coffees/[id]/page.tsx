@@ -13,15 +13,15 @@ import {
 } from 'lucide-react';
 import { PageLayoutServer } from '@/components/layout/PageLayoutServer';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import AddReviewButton from '@/components/AddReviewButton';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { StarRating } from '@/components/ui/StarRating';
 import { ReviewCard } from '@/components/ReviewCard';
 import { CoffeeCard } from '@/components/CoffeeCard';
 import api from '@/lib/api/realApi';
-import { Coffee } from '@/types';
+import type { Coffee } from '@sipzy/shared/types';
 
 // Composant pour les informations du café
 const CoffeeInfo = ({ coffee }: { coffee: Coffee }) => {
@@ -248,7 +248,7 @@ const ReviewsSection = async ({ coffeeId }: { coffeeId: number }) => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {reviewsResult.data.map((review) => (
+          {reviewsResult.data.map((review: any) => (
             <ReviewCard
               key={review.id}
               review={review}
@@ -400,7 +400,7 @@ export default async function CoffeeDetailPage({ params }: { params: Promise<{ i
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const coffeeId = parseInt(id);
-  const coffee = await coffeeApi.getCoffeeById(coffeeId);
+  const coffee = await api.coffees.getById(coffeeId);
 
   if (!coffee) {
     return {

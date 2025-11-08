@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AddReviewModal from '@/components/AddReviewModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 
 export default function AddReviewButton({ coffeeId }: { coffeeId: number }) {
   const [open, setOpen] = useState(false);

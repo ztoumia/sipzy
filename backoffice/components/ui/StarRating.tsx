@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Star } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@sipzy/shared/lib/utils';
 
 interface StarRatingProps {
   rating: number;

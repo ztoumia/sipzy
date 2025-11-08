@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import { Suspense } from 'react';
 import { Providers } from './providers';
 import { NavigationLoader } from '@/components/common/NavigationLoader';
 import './globals.css';
@@ -78,7 +79,9 @@ export default function RootLayout({
     <html lang="fr" className={`${inter.variable} ${playfair.variable}`}>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <NavigationLoader />
+          <Suspense fallback={null}>
+            <NavigationLoader />
+          </Suspense>
           {children}
         </Providers>
       </body>

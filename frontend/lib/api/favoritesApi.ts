@@ -3,8 +3,9 @@
  * Utilise le backend real API pour gérer les favoris
  */
 
-import apiClient, { unwrapResponse } from './apiClient';
-import type { ApiResponse, PageResponse, CoffeeResponse } from '../types/api';
+import { apiClient, unwrapResponse } from '@sipzy/shared/lib/api/apiClient';
+import type { ApiResponse, Coffee } from '@sipzy/shared/types';
+import type { PageResponse } from './adminApi';
 
 /**
  * Ajouter un café aux favoris
@@ -50,8 +51,8 @@ export const isFavorite = async (coffeeId: number): Promise<boolean> => {
  * Récupérer tous les cafés favoris avec pagination
  * GET /api/users/favorites?page=1&limit=12
  */
-export const getFavorites = async (page = 1, limit = 12): Promise<PageResponse<CoffeeResponse>> => {
-  const response = await apiClient.get<PageResponse<CoffeeResponse>>('/api/users/favorites', {
+export const getFavorites = async (page = 1, limit = 12): Promise<PageResponse<Coffee>> => {
+  const response = await apiClient.get<PageResponse<Coffee>>('/api/users/favorites', {
     params: { page, limit },
   });
   return response.data;

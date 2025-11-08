@@ -2,7 +2,7 @@
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { Upload, FileJson, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@sipzy/shared/lib/utils';
 
 interface JsonUploaderProps {
   onJsonLoad: (json: string) => void;

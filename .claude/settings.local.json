@@ -16,7 +16,12 @@
       "Bash(powershell \"Start-Sleep -Seconds 10\")",
       "Bash(powershell \"Start-Sleep -Seconds 5\")",
       "Bash(curl:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(tree:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 180 npm run build:*)"
     ],
     "deny": [],
     "ask": []

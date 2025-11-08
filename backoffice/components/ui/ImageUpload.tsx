@@ -2,7 +2,7 @@
 
 import { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import { Upload, X, ImageIcon } from 'lucide-react';
-import { Button } from './Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 
 interface ImageUploadProps {
   value?: string;

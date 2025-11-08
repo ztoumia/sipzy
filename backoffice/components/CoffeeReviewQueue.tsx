@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Coffee as CoffeeIcon, MapPin, CheckCircle, XCircle, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Coffee } from '@/types';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
+import { Coffee } from '@sipzy/shared/types';
 
 interface CoffeeReviewQueueProps {
   coffees: Coffee[];
@@ -192,7 +192,7 @@ export function CoffeeReviewQueue({ coffees, onApprove, onReject }: CoffeeReview
                         Ajouter des notes
                       </Button>
                       <Button
-                        variant="default"
+                        variant="primary"
                         size="sm"
                         onClick={() => handleApprove(coffee.id)}
                         disabled={isLoading}
@@ -226,7 +226,7 @@ export function CoffeeReviewQueue({ coffees, onApprove, onReject }: CoffeeReview
                         Annuler
                       </Button>
                       <Button
-                        variant="default"
+                        variant="primary"
                         size="sm"
                         onClick={() => handleApprove(coffee.id)}
                         disabled={isLoading}
@@ -237,7 +237,7 @@ export function CoffeeReviewQueue({ coffees, onApprove, onReject }: CoffeeReview
                         Approuver
                       </Button>
                       <Button
-                        variant="default"
+                        variant="primary"
                         size="sm"
                         onClick={() => handleReject(coffee.id)}
                         disabled={isLoading}

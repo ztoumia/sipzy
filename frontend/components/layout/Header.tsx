@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, Menu, X, LogOut, Coffee, Heart, User, FileText, Shield, LayoutDashboard, CheckCircle, Flag, Users, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Avatar } from '@/components/ui/Avatar';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { Input } from '@sipzy/shared/components/ui/Input';
+import { Avatar } from '@sipzy/shared/components/ui/Avatar';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/DropdownMenu';
 
 interface HeaderProps {

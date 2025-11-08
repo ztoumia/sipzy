@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
 import { ReviewCard } from '@/components/ReviewCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { profileApi } from '@/lib/api/profileApi';
-import { Review } from '@/types';
+import { Review } from '@sipzy/shared/types';
 
 export default function MyReviewsPage() {
   const router = useRouter();
@@ -80,9 +81,11 @@ export default function MyReviewsPage() {
               <p className="text-gray-600 mb-6">
                 Vous n'avez pas encore publié d'avis sur des cafés.
               </p>
-              <Button href="/coffees">
-                Découvrir des cafés
-              </Button>
+              <Link href="/coffees">
+                <Button>
+                  Découvrir des cafés
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="space-y-6">

@@ -1,7 +1,6 @@
 /**
  * Axios HTTP Client Configuration (Shared Version)
  * Base configuration for API client with rate limiting support
- * Can be extended in frontend and backoffice with specific configurations
  */
 
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
@@ -11,21 +10,18 @@ import type { ApiResponse, ErrorResponse } from '../../types';
 // Configuration
 // ============================================================================
 
-/**
- * Create base axios instance with common configuration
- * BASE_URL should be provided by the consuming application
- */
-export function createApiClient(baseURL: string) {
-  const apiClient = axios.create({
-    baseURL,
-    timeout: 30000, // 30 seconds
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  return apiClient;
-}
+/**
+ * Main API client instance
+ */
+export const apiClient = axios.create({
+  baseURL: BASE_URL,
+  timeout: 30000, // 30 seconds
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 // ============================================================================
 // Rate Limiting State Management (2025 Best Practices)
@@ -94,154 +90,145 @@ export function extractRateLimitHeaders(response: AxiosResponse): void {
 }
 
 // ============================================================================
-// Common Interceptors
+// Interceptors Setup
 // ============================================================================
 
 /**
- * Setup request interceptor for authentication
+ * Request interceptor for authentication
  * Adds JWT token from localStorage if available
  */
-export function setupRequestInterceptor(apiClient: ReturnType<typeof createApiClient>) {
-  apiClient.interceptors.request.use(
-    (config: InternalAxiosRequestConfig) => {
-      // Get token from localStorage (only on client side)
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('authToken');
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Get token from localStorage (only on client side)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('authToken');
 
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
-
-      // Log request in development
-      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
-          params: config.params,
-          data: config.data,
-        });
-      }
-
-      return config;
-    },
-    (error) => {
-      if (typeof window !== 'undefined') {
-        console.error('[API Request Error]', error);
-      }
-      return Promise.reject(error);
     }
-  );
-}
+
+    // Log request in development
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
+        params: config.params,
+        data: config.data,
+      });
+    }
+
+    return config;
+  },
+  (error) => {
+    if (typeof window !== 'undefined') {
+      console.error('[API Request Error]', error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 /**
- * Setup response interceptor for rate limiting and error handling
+ * Response interceptor for rate limiting and error handling
  */
-export function setupResponseInterceptor(
-  apiClient: ReturnType<typeof createApiClient>,
-  onUnauthorized?: () => void
-) {
-  apiClient.interceptors.response.use(
-    (response: AxiosResponse) => {
-      // Extract rate limit headers from all responses
-      extractRateLimitHeaders(response);
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    // Extract rate limit headers from all responses
+    extractRateLimitHeaders(response);
 
-      // Log response in development (client side only)
-      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-          status: response.status,
-          data: response.data,
-        });
-      }
+    // Log response in development (client side only)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, {
+        status: response.status,
+        data: response.data,
+      });
+    }
 
-      return response;
-    },
-    async (error: AxiosError<ErrorResponse>) => {
-      // Log error in development (client side only)
-      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-        console.group('[API Error]');
-        console.log('Message:', error.message);
-        console.log('URL:', error.config?.url || 'unknown');
-        console.log('Method:', error.config?.method?.toUpperCase() || 'unknown');
-        console.log('Status:', error.response?.status);
-        console.log('Status Text:', error.response?.statusText);
-        console.log('Response Data:', error.response?.data);
-        console.log('Error Code:', error.code);
-        console.groupEnd();
-      }
+    return response;
+  },
+  async (error: AxiosError<ErrorResponse>) => {
+    // Log error in development (client side only)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      console.group('[API Error]');
+      console.log('Message:', error.message);
+      console.log('URL:', error.config?.url || 'unknown');
+      console.log('Method:', error.config?.method?.toUpperCase() || 'unknown');
+      console.log('Status:', error.response?.status);
+      console.log('Status Text:', error.response?.statusText);
+      console.log('Response Data:', error.response?.data);
+      console.log('Error Code:', error.code);
+      console.groupEnd();
+    }
 
-      // Handle specific error cases (client side only)
-      if (typeof window !== 'undefined' && error.response) {
-        const { status, data } = error.response;
+    // Handle specific error cases (client side only)
+    if (typeof window !== 'undefined' && error.response) {
+      const { status } = error.response;
 
-        switch (status) {
-          case 401: {
-            // Unauthorized - Token expired or invalid
-            if (onUnauthorized) {
-              onUnauthorized();
-            }
-            break;
+      switch (status) {
+        case 401: {
+          // Unauthorized - Token expired or invalid
+          // Applications can listen for this and handle accordingly
+          break;
+        }
+
+        case 429: {
+          // Rate limit exceeded - Extract retry information
+          const retryAfter = error.response.headers['retry-after'];
+          const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : 60;
+
+          // Extract rate limit headers from error response
+          extractRateLimitHeaders(error.response);
+          rateLimitState.retryAfter = retryAfterSeconds;
+
+          // Calculate retry time
+          const retryTime = new Date(Date.now() + retryAfterSeconds * 1000).toLocaleTimeString();
+
+          console.warn('[API] Rate limit exceeded:', {
+            retryAfter: `${retryAfterSeconds}s`,
+            retryAt: retryTime,
+            limit: rateLimitState.limit,
+            remaining: rateLimitState.remaining,
+          });
+
+          // Attempt automatic retry for non-sensitive endpoints
+          const config = error.config;
+          const isSensitiveEndpoint = config?.url?.includes('/auth/login') ||
+                                     config?.url?.includes('/auth/register') ||
+                                     config?.url?.includes('/auth/reset-password');
+
+          // Only auto-retry for GET requests on non-sensitive endpoints
+          // and if retry delay is reasonable (less than 10 seconds)
+          if (config &&
+              config.method?.toLowerCase() === 'get' &&
+              !isSensitiveEndpoint &&
+              retryAfterSeconds <= 10 &&
+              !(config as any)._retried) {
+
+            console.log(`[API] Auto-retrying request after ${retryAfterSeconds}s...`);
+
+            // Mark request as retried to prevent infinite loops
+            (config as any)._retried = true;
+
+            // Wait for the specified retry time
+            await new Promise(resolve => setTimeout(resolve, retryAfterSeconds * 1000));
+
+            // Retry the request
+            return apiClient.request(config);
           }
 
-          case 429: {
-            // Rate limit exceeded - Extract retry information
-            const retryAfter = error.response.headers['retry-after'];
-            const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : 60;
+          break;
+        }
 
-            // Extract rate limit headers from error response
-            extractRateLimitHeaders(error.response);
-            rateLimitState.retryAfter = retryAfterSeconds;
-
-            // Calculate retry time
-            const retryTime = new Date(Date.now() + retryAfterSeconds * 1000).toLocaleTimeString();
-
-            console.warn('[API] Rate limit exceeded:', {
-              retryAfter: `${retryAfterSeconds}s`,
-              retryAt: retryTime,
-              limit: rateLimitState.limit,
-              remaining: rateLimitState.remaining,
-            });
-
-            // Attempt automatic retry for non-sensitive endpoints
-            const config = error.config;
-            const isSensitiveEndpoint = config?.url?.includes('/auth/login') ||
-                                       config?.url?.includes('/auth/register') ||
-                                       config?.url?.includes('/auth/reset-password');
-
-            // Only auto-retry for GET requests on non-sensitive endpoints
-            // and if retry delay is reasonable (less than 10 seconds)
-            if (config &&
-                config.method?.toLowerCase() === 'get' &&
-                !isSensitiveEndpoint &&
-                retryAfterSeconds <= 10 &&
-                !(config as any)._retried) {
-
-              console.log(`[API] Auto-retrying request after ${retryAfterSeconds}s...`);
-
-              // Mark request as retried to prevent infinite loops
-              (config as any)._retried = true;
-
-              // Wait for the specified retry time
-              await new Promise(resolve => setTimeout(resolve, retryAfterSeconds * 1000));
-
-              // Retry the request
-              return apiClient.request(config);
-            }
-
-            break;
-          }
-
-          default: {
-            // Log other errors
-            if (process.env.NODE_ENV === 'development') {
-              console.error('[API] Error:', data.message);
-            }
+        default: {
+          // Log other errors
+          if (process.env.NODE_ENV === 'development') {
+            console.error('[API] Error:', error.response.data);
           }
         }
       }
-
-      return Promise.reject(error);
     }
-  );
-}
+
+    return Promise.reject(error);
+  }
+);
 
 // ============================================================================
 // Helper Functions
@@ -265,6 +252,8 @@ export function isErrorResponse(error: unknown): error is AxiosError<ErrorRespon
     error instanceof Error &&
     'response' in error &&
     error.response !== undefined &&
+    error.response !== null &&
+    typeof error.response === 'object' &&
     'data' in error.response &&
     typeof error.response.data === 'object' &&
     error.response.data !== null &&
@@ -281,14 +270,16 @@ export function getErrorMessage(error: unknown): string {
   if (isErrorResponse(error)) {
     const errorData = error.response?.data;
 
-    // Validation errors
-    if (errorData.validationErrors) {
-      const errors = Object.values(errorData.validationErrors);
-      return errors.length > 0 ? errors[0] : errorData.message;
-    }
+    if (errorData) {
+      // Validation errors
+      if (errorData.validationErrors) {
+        const errors = Object.values(errorData.validationErrors);
+        return errors.length > 0 ? errors[0] : errorData.message;
+      }
 
-    // Standard error message
-    return errorData.message || 'Une erreur est survenue';
+      // Standard error message
+      return errorData.message || 'Une erreur est survenue';
+    }
   }
 
   // Check if it's a basic Axios error (without proper ErrorResponse structure)

@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { Coffee, Clock, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
 
 // Simule les propositions de l'utilisateur
 interface CoffeeSubmission {

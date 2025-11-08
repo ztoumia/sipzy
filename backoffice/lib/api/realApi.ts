@@ -3,26 +3,50 @@
  * Contains only admin-specific and authentication endpoints
  */
 
-import apiClient, { unwrapResponse } from './apiClient';
+import { apiClient, unwrapResponse } from '@sipzy/shared/lib/api/apiClient';
 import type {
   ApiResponse,
-  PageResponse,
-  // Auth
-  LoginRequest,
   AuthResponse,
-  // Users
-  UserResponse,
-  UpdateProfileRequest,
-  // Coffees
-  CoffeeResponse,
-  ModerateCoffeeRequest,
-  // Admin
-  AdminStatsResponse,
-  BanUserRequest,
-  ReportResponse,
-  ModerateReportRequest,
-  ActivityResponse,
-} from '../types/api';
+  User,
+  Coffee,
+  Report,
+  AdminStats,
+  LoginForm,
+  UserProfileForm,
+  PaginatedResponse,
+} from '@sipzy/shared/types';
+
+// Local request/response types not in shared
+export interface PageResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+  };
+}
+
+export interface ModerateCoffeeRequest {
+  adminNotes?: string;
+}
+
+export interface BanUserRequest {
+  reason?: string;
+}
+
+export interface ModerateReportRequest {
+  adminNotes?: string;
+}
+
+export interface ActivityResponse {
+  id: number;
+  message: string;
+  timestamp: string;
+  type: string;
+  userId?: number;
+  targetId?: number;
+}
 
 // ============================================================================
 // Authentication API
@@ -33,7 +57,7 @@ export const authApi = {
    * Login admin user
    * POST /api/auth/login
    */
-  async login(credentials: LoginRequest): Promise<AuthResponse> {
+  async login(credentials: LoginForm): Promise<AuthResponse> {
     const response = await apiClient.post<ApiResponse<AuthResponse>>(
       '/api/auth/login',
       credentials
@@ -53,8 +77,8 @@ export const authApi = {
    * Verify JWT token and check admin role
    * POST /api/auth/verify-token
    */
-  async verifyToken(): Promise<UserResponse> {
-    const response = await apiClient.post<ApiResponse<UserResponse>>('/api/auth/verify-token');
+  async verifyToken(): Promise<User> {
+    const response = await apiClient.post<ApiResponse<User>>('/api/auth/verify-token');
     return unwrapResponse(response);
   },
 };
@@ -68,8 +92,8 @@ export const usersApi = {
    * Update own profile
    * PUT /api/users/profile
    */
-  async updateProfile(data: UpdateProfileRequest): Promise<UserResponse> {
-    const response = await apiClient.put<ApiResponse<UserResponse>>('/api/users/profile', data);
+  async updateProfile(data: UserProfileForm): Promise<User> {
+    const response = await apiClient.put<ApiResponse<User>>('/api/users/profile', data);
     return unwrapResponse(response);
   },
 };
@@ -87,8 +111,8 @@ export const adminApi = {
    * Get admin dashboard stats
    * GET /api/admin/stats
    */
-  async getStats(): Promise<AdminStatsResponse> {
-    const response = await apiClient.get<ApiResponse<AdminStatsResponse>>('/api/admin/stats');
+  async getStats(): Promise<AdminStats> {
+    const response = await apiClient.get<ApiResponse<AdminStats>>('/api/admin/stats');
     return unwrapResponse(response);
   },
 
@@ -114,8 +138,8 @@ export const adminApi = {
   async getPendingCoffees(options?: {
     page?: number;
     limit?: number;
-  }): Promise<PageResponse<CoffeeResponse>> {
-    const response = await apiClient.get<PageResponse<CoffeeResponse>>(
+  }): Promise<PageResponse<Coffee>> {
+    const response = await apiClient.get<PageResponse<Coffee>>(
       '/api/admin/coffees/pending',
       { params: options }
     );
@@ -131,8 +155,8 @@ export const adminApi = {
     search?: string;
     page?: number;
     limit?: number;
-  }): Promise<PageResponse<CoffeeResponse>> {
-    const response = await apiClient.get<PageResponse<CoffeeResponse>>('/api/admin/coffees', {
+  }): Promise<PageResponse<Coffee>> {
+    const response = await apiClient.get<PageResponse<Coffee>>('/api/admin/coffees', {
       params: options,
     });
     return response.data;
@@ -142,8 +166,8 @@ export const adminApi = {
    * Approve coffee
    * PUT /api/admin/coffees/{id}/approve
    */
-  async approveCoffee(id: number, data?: ModerateCoffeeRequest): Promise<CoffeeResponse> {
-    const response = await apiClient.put<ApiResponse<CoffeeResponse>>(
+  async approveCoffee(id: number, data?: ModerateCoffeeRequest): Promise<Coffee> {
+    const response = await apiClient.put<ApiResponse<Coffee>>(
       `/api/admin/coffees/${id}/approve`,
       data || {}
     );
@@ -154,8 +178,8 @@ export const adminApi = {
    * Reject coffee
    * PUT /api/admin/coffees/{id}/reject
    */
-  async rejectCoffee(id: number, data?: ModerateCoffeeRequest): Promise<CoffeeResponse> {
-    const response = await apiClient.put<ApiResponse<CoffeeResponse>>(
+  async rejectCoffee(id: number, data?: ModerateCoffeeRequest): Promise<Coffee> {
+    const response = await apiClient.put<ApiResponse<Coffee>>(
       `/api/admin/coffees/${id}/reject`,
       data || {}
     );
@@ -173,8 +197,8 @@ export const adminApi = {
   async getAllUsers(options?: {
     page?: number;
     limit?: number;
-  }): Promise<PageResponse<UserResponse>> {
-    const response = await apiClient.get<PageResponse<UserResponse>>('/api/admin/users', {
+  }): Promise<PageResponse<User>> {
+    const response = await apiClient.get<PageResponse<User>>('/api/admin/users', {
       params: options,
     });
     return response.data;
@@ -184,8 +208,8 @@ export const adminApi = {
    * Ban user
    * PUT /api/admin/users/{id}/ban
    */
-  async banUser(id: number, data: BanUserRequest): Promise<UserResponse> {
-    const response = await apiClient.put<ApiResponse<UserResponse>>(
+  async banUser(id: number, data: BanUserRequest): Promise<User> {
+    const response = await apiClient.put<ApiResponse<User>>(
       `/api/admin/users/${id}/ban`,
       data
     );
@@ -196,8 +220,8 @@ export const adminApi = {
    * Unban user
    * PUT /api/admin/users/{id}/unban
    */
-  async unbanUser(id: number): Promise<UserResponse> {
-    const response = await apiClient.put<ApiResponse<UserResponse>>(
+  async unbanUser(id: number): Promise<User> {
+    const response = await apiClient.put<ApiResponse<User>>(
       `/api/admin/users/${id}/unban`
     );
     return unwrapResponse(response);
@@ -214,8 +238,8 @@ export const adminApi = {
   async getPendingReports(options?: {
     page?: number;
     limit?: number;
-  }): Promise<PageResponse<ReportResponse>> {
-    const response = await apiClient.get<PageResponse<ReportResponse>>(
+  }): Promise<PageResponse<Report>> {
+    const response = await apiClient.get<PageResponse<Report>>(
       '/api/admin/reports/pending',
       { params: options }
     );
@@ -230,8 +254,8 @@ export const adminApi = {
     status?: string;
     page?: number;
     limit?: number;
-  }): Promise<PageResponse<ReportResponse>> {
-    const response = await apiClient.get<PageResponse<ReportResponse>>('/api/admin/reports', {
+  }): Promise<PageResponse<Report>> {
+    const response = await apiClient.get<PageResponse<Report>>('/api/admin/reports', {
       params: options,
     });
     return response.data;
@@ -241,8 +265,8 @@ export const adminApi = {
    * Resolve report
    * PUT /api/admin/reports/{id}/resolve
    */
-  async resolveReport(id: number, data?: ModerateReportRequest): Promise<ReportResponse> {
-    const response = await apiClient.put<ApiResponse<ReportResponse>>(
+  async resolveReport(id: number, data?: ModerateReportRequest): Promise<Report> {
+    const response = await apiClient.put<ApiResponse<Report>>(
       `/api/admin/reports/${id}/resolve`,
       data || {}
     );
@@ -253,8 +277,8 @@ export const adminApi = {
    * Dismiss report
    * PUT /api/admin/reports/{id}/dismiss
    */
-  async dismissReport(id: number, data?: ModerateReportRequest): Promise<ReportResponse> {
-    const response = await apiClient.put<ApiResponse<ReportResponse>>(
+  async dismissReport(id: number, data?: ModerateReportRequest): Promise<Report> {
+    const response = await apiClient.put<ApiResponse<Report>>(
       `/api/admin/reports/${id}/dismiss`,
       data || {}
     );

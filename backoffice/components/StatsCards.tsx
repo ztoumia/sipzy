@@ -14,7 +14,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       value: stats.totalCoffees,
       icon: Coffee,
       color: 'bg-coffee-100 text-coffee-600',
-      description: `${stats.approvedCoffees} approuvés`,
+      description: 'Cafés au total',
     },
     {
       title: 'En Attente',
@@ -38,18 +38,18 @@ export function StatsCards({ stats }: StatsCardsProps) {
       description: 'Avis publiés',
     },
     {
-      title: 'Approuvés',
-      value: stats.approvedCoffees,
+      title: 'Avis en attente',
+      value: stats.pendingReviews,
       icon: CheckCircle,
       color: 'bg-green-100 text-green-600',
-      description: 'Cafés validés',
+      description: 'Avis à modérer',
     },
     {
-      title: 'Rejetés',
-      value: stats.rejectedCoffees,
+      title: 'Signalements',
+      value: stats.reportedContent,
       icon: XCircle,
       color: 'bg-red-100 text-red-600',
-      description: 'Cafés refusés',
+      description: 'Contenus signalés',
     },
   ];
 

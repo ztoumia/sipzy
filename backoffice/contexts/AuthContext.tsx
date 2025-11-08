@@ -2,10 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api/realApi';
-import { setAuthToken, removeAuthToken, getErrorMessage } from '@/lib/api/apiClient';
-import type { UserResponse } from '@/lib/types/api';
+import { setAuthToken, removeAuthToken, getErrorMessage } from '@sipzy/shared/lib/api/apiClient';
 
-// Map UserResponse to frontend User type
 interface User {
   id: number;
   username: string;
@@ -106,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (data: Partial<User>) => {
     try {
-      if (user) {
+      if (user && data.username) {
         const result = await api.users.updateProfile({
           username: data.username,
           bio: data.bio,

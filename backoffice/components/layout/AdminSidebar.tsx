@@ -12,7 +12,7 @@ import {
   Settings,
   ChevronLeft,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@sipzy/shared/lib/utils';
 import { useAdminSidebar } from '@/contexts/AdminSidebarContext';
 import { SidebarItem } from './SidebarItem';
 

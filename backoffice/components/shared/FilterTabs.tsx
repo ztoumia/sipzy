@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@sipzy/shared/lib/utils';
 
 export interface FilterTab<T extends string = string> {
   id: T;

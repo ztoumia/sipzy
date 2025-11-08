@@ -8,7 +8,7 @@ import { LoadingState, LoadingSpinner } from '@/components/shared/LoadingState';
 import { StatsCards } from '@/components/StatsCards';
 import { CoffeeReviewQueue } from '@/components/CoffeeReviewQueue';
 import { adminApi, AdminStats } from '@/lib/api/adminApi';
-import { Coffee as CoffeeType } from '@/types';
+import { Coffee as CoffeeType } from '@sipzy/shared/types';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);

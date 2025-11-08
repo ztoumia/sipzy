@@ -21,9 +21,9 @@ export const metadata = {
 
 export default async function HomePage() {
   // Récupérer les données côté serveur avec gestion d'erreur
-  let popularCoffees = [];
-  let recentReviews = [];
-  let error = null;
+  let popularCoffees: any[] = [];
+  let recentReviews: any[] = [];
+  let error: string | null = null;
 
   try {
     popularCoffees = await api.coffees.getPopular(8);

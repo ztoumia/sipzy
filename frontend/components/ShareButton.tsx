@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Share2, Check, Copy } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { shareContent, canUseWebShare } from '@/lib/utils/share';
+import { Button } from '@sipzy/shared/components/ui/Button';
+import { shareContent, canUseWebShare } from '@sipzy/shared/lib/utils/share';
 
 interface ShareButtonProps {
   title: string;

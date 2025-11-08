@@ -4,12 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Coffee as CoffeeIcon } from 'lucide-react';
-import { Coffee } from '@/types';
+import { Coffee } from '@sipzy/shared/types';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@sipzy/shared/components/ui/Badge';
 import { StarRating } from '@/components/ui/StarRating';
 import { FavoriteButton } from '@/components/FavoriteButton';
-import { cn } from '@/lib/utils/cn';
+import { cn } from '@sipzy/shared/lib/utils/cn';
 
 interface CoffeeCardProps {
   coffee: Coffee;

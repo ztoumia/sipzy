@@ -1,0 +1,16 @@
+frontend/lib/api/apiClient.ts
+frontend/lib/types/api.ts
+frontend/lib/utils/cn.ts
+frontend/lib/utils/share.ts
+frontend/components/ui/Button.tsx
+frontend/components/ui/Input.tsx
+frontend/components/ui/Avatar.tsx
+frontend/components/ui/Badge.tsx
+backoffice/lib/api/apiClient.ts
+backoffice/lib/types/api.ts
+backoffice/lib/utils/cn.ts
+backoffice/lib/utils/share.ts
+backoffice/components/ui/Button.tsx
+backoffice/components/ui/Input.tsx
+backoffice/components/ui/Avatar.tsx
+backoffice/components/ui/Badge.tsx

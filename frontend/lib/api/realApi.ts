@@ -3,36 +3,29 @@
  * Replaces mock API with actual Spring Boot backend calls
  */
 
-import apiClient, { unwrapResponse } from './apiClient';
-import type {
-  ApiResponse,
-  PageResponse,
-  // Auth
-  LoginRequest,
-  RegisterRequest,
-  AuthResponse,
-  // Users
-  UserResponse,
-  UserProfileResponse,
-  UpdateProfileRequest,
-  UserPreferencesResponse,
-  // Coffees
-  CoffeeResponse,
-  CreateCoffeeRequest,
-  CoffeeFiltersRequest,
-  // Roasters
-  RoasterResponse,
-  // Notes
-  NoteResponse,
-  NoteByCategoryResponse,
-  // Reviews
-  ReviewResponse,
-  CreateReviewRequest,
-  VoteReviewRequest,
-  ReviewVoteResponse,
-  // Upload
-  UploadSignatureResponse,
-} from '../types/api';
+import { apiClient, unwrapResponse } from '@sipzy/shared/lib/api/apiClient';
+import type { ApiResponse } from '@sipzy/shared/types';
+
+// Type aliases for backend API responses (using any for now)
+type PageResponse<T> = { data: T[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
+type LoginRequest = any;
+type RegisterRequest = any;
+type AuthResponse = any;
+type UserResponse = any;
+type UserProfileResponse = any;
+type UpdateProfileRequest = any;
+type UserPreferencesResponse = any;
+type CoffeeResponse = any;
+type CreateCoffeeRequest = any;
+type CoffeeFiltersRequest = any;
+type RoasterResponse = any;
+type NoteResponse = any;
+type NoteByCategoryResponse = any;
+type ReviewResponse = any;
+type CreateReviewRequest = any;
+type VoteReviewRequest = any;
+type ReviewVoteResponse = any;
+type UploadSignatureResponse = any;
 
 // ============================================================================
 // Authentication API

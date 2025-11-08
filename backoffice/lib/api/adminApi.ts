@@ -3,8 +3,8 @@
  * Handles all admin-specific API calls
  */
 
-import { apiClient } from './apiClient';
-import { Coffee } from '@/types';
+import { apiClient } from '@sipzy/shared/lib/api/apiClient';
+import { Coffee } from '@sipzy/shared/types';
 
 // ============================================================================
 // Types

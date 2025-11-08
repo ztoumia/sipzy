@@ -2,19 +2,20 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Heart } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Container } from '@/components/layout/Container';
 import { CoffeeCard } from '@/components/CoffeeCard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { favoritesApi } from '@/lib/api/favoritesApi';
-import type { CoffeeResponse } from '@/lib/types/api';
+import type { Coffee } from '@sipzy/shared/types';
 
 export default function MyFavoritesPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [favorites, setFavorites] = useState<CoffeeResponse[]>([]);
+  const [favorites, setFavorites] = useState<Coffee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -103,9 +104,11 @@ export default function MyFavoritesPage() {
                 <br />
                 Explorez notre catalogue et cliquez sur le cœur pour sauvegarder vos cafés préférés !
               </p>
-              <Button href="/coffees">
-                Découvrir des cafés
-              </Button>
+              <Link href="/coffees">
+                <Button>
+                  Découvrir des cafés
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="space-y-6">

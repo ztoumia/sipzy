@@ -10,7 +10,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { CoffeeReviewQueue } from '@/components/CoffeeReviewQueue';
 import { adminApi } from '@/lib/api/adminApi';
-import { Coffee as CoffeeType } from '@/types';
+import { Coffee as CoffeeType } from '@sipzy/shared/types';
 
 type StatusFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED';
 

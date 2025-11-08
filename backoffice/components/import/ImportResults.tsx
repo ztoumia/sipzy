@@ -2,7 +2,7 @@
 
 import { CheckCircle, XCircle, AlertTriangle, SkipForward, Download } from 'lucide-react';
 import { ImportResponse, ImportResult } from '@/lib/api/importApi';
-import { cn } from '@/lib/utils';
+import { cn } from '@sipzy/shared/lib/utils';
 
 interface ImportResultsProps {
   response: ImportResponse;

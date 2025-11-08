@@ -174,7 +174,7 @@ export type UpdateProfilePreferencesInput = z.infer<typeof updateProfilePreferen
 export const reportSchema = z.object({
   reason: z
     .enum(['SPAM', 'OFFENSIVE', 'INAPPROPRIATE', 'COPYRIGHT', 'OTHER'], {
-      errorMap: () => ({ message: 'Veuillez sélectionner un motif' }),
+      message: 'Veuillez sélectionner un motif',
     }),
   description: z
     .string()

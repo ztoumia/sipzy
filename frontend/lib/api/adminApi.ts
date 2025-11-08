@@ -1,5 +1,5 @@
-import { apiClient } from './apiClient';
-import { Coffee, Report, User } from '@/types';
+import { apiClient } from '@sipzy/shared/lib/api/apiClient';
+import { Coffee, Report, User } from '@sipzy/shared/types';
 
 // Types for admin API
 export interface AdminStats {

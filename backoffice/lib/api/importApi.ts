@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiClient } from '@sipzy/shared/lib/api/apiClient';
 
 // ============================================
 // TypeScript Interfaces (matching backend DTOs)

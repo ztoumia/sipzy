@@ -3,15 +3,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { Flag, MoreHorizontal } from 'lucide-react';
-import { Review } from '@/types';
+import { Review } from '@sipzy/shared/types';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Avatar } from '@/components/ui/Avatar';
+import { Avatar } from '@sipzy/shared/components/ui/Avatar';
 import { StarRating } from '@/components/ui/StarRating';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@sipzy/shared/components/ui/Button';
 import { ShareButton } from '@/components/ShareButton';
 import { VoteButtons } from '@/components/VoteButtons';
-import { getReviewShareUrl } from '@/lib/utils/share';
-import { cn } from '@/lib/utils/cn';
+import { getReviewShareUrl } from '@sipzy/shared/lib/utils/share';
+import { cn } from '@sipzy/shared/lib/utils/cn';
 
 interface ReviewCardProps {
   review: Review;
