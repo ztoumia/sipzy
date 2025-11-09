@@ -23,15 +23,33 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [statsData, pendingData, activityData] = await Promise.all([
+      // Load data independently to prevent one failure from blocking others
+      const results = await Promise.allSettled([
         adminApi.getStats(),
         adminApi.getPendingCoffees(1, 5),
         adminApi.getRecentActivity(10),
       ]);
 
-      setStats(statsData);
-      setPendingCoffees(pendingData.data);
-      setRecentActivity(activityData);
+      // Handle stats
+      if (results[0].status === 'fulfilled') {
+        setStats(results[0].value);
+      } else {
+        console.error('Error loading stats:', results[0].reason);
+      }
+
+      // Handle pending coffees
+      if (results[1].status === 'fulfilled') {
+        setPendingCoffees(results[1].value.data);
+      } else {
+        console.error('Error loading pending coffees:', results[1].reason);
+      }
+
+      // Handle recent activity
+      if (results[2].status === 'fulfilled') {
+        setRecentActivity(results[2].value);
+      } else {
+        console.error('Error loading recent activity:', results[2].reason);
+      }
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
