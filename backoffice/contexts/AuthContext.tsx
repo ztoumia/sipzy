@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import api from '@/lib/api/realApi';
-import { setAuthToken, removeAuthToken, getErrorMessage } from '@sipzy/shared/lib/api/apiClient';
+import { setAuthToken, removeAuthToken, logout as apiLogout, getErrorMessage } from '@sipzy/shared/lib/api/apiClient';
 
 interface User {
   id: number;
@@ -88,10 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    removeAuthToken();
-    localStorage.removeItem('user');
+
+    // Call API logout (includes removeAuthToken)
+    await apiLogout();
 
     // Supprimer aussi le cookie
     document.cookie = 'authToken=; path=/; max-age=0';
