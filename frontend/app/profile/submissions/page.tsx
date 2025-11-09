@@ -29,7 +29,7 @@ export default function MySubmissionsPage() {
 
   // Vérifier l'authentification
   useEffect(() => {
-    const authToken = localStorage.getItem('auth_token');
+    const authToken = localStorage.getItem('authToken');
     if (!authToken) {
       localStorage.setItem('redirect_after_login', '/profile/submissions');
       router.push('/auth/login');
