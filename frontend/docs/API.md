@@ -131,7 +131,7 @@ Response:
       "roaster": {
         "id": 1,
         "name": "La Brûlerie",
-        "country": "France",
+        "location": "France",
         "website": "https://...",
         "logoUrl": "https://...",
         "description": "...",
@@ -1024,7 +1024,7 @@ interface Review {
 interface Roaster {
   id: number;
   name: string;
-  country?: string;
+  location?: string;  // Breaking change v1.1.0: renamed from 'country'
   website?: string;
   logoUrl?: string;
   description?: string;

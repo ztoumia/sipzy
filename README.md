@@ -89,8 +89,8 @@ sipzy/
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| Frontend | ✅ **Production Ready** | Next.js 15, React 18, TypeScript |
-| Backend | ⏳ **In Progress (35%)** | Spring Boot 3.2, PostgreSQL |
+| Frontend | ✅ **Production Ready** | Next.js 15, React 19, TypeScript |
+| Backend | ✅ **Production Ready** | Spring Boot 3.2, PostgreSQL, 12 controllers, 46/46 tests |
 
 ## Tech Stack
 
