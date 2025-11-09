@@ -111,7 +111,7 @@ export const adminApi = {
    * Approve a coffee
    */
   async approveCoffee(action: ModerationAction): Promise<void> {
-    await apiClient.post(`/api/admin/coffees/${action.coffeeId}/approve`, {
+    await apiClient.put(`/api/admin/coffees/${action.coffeeId}/approve`, {
       adminNotes: action.adminNotes,
     });
   },
@@ -120,7 +120,7 @@ export const adminApi = {
    * Reject a coffee
    */
   async rejectCoffee(action: ModerationAction): Promise<void> {
-    await apiClient.post(`/api/admin/coffees/${action.coffeeId}/reject`, {
+    await apiClient.put(`/api/admin/coffees/${action.coffeeId}/reject`, {
       adminNotes: action.adminNotes,
     });
   },
@@ -136,10 +136,10 @@ export const adminApi = {
    * Get recent activity logs
    */
   async getRecentActivity(limit: number = 10): Promise<ActivityLog[]> {
-    const response = await apiClient.get<ActivityLog[]>('/api/admin/activity/recent', {
+    const response = await apiClient.get<{ success: boolean; data: ActivityLog[] }>('/api/admin/activity', {
       params: { limit },
     });
-    return response.data;
+    return response.data.data;
   },
 
   /**
@@ -162,10 +162,17 @@ export const adminApi = {
 
   /**
    * Get user statistics
+   * TODO: Backend endpoint not implemented yet
    */
   async getUserStats(): Promise<any> {
-    const response = await apiClient.get('/api/admin/users/stats');
-    return response.data;
+    // const response = await apiClient.get('/api/admin/users/stats');
+    // return response.data;
+    console.warn('[Admin API] getUserStats endpoint not implemented in backend');
+    return {
+      totalUsers: 0,
+      activeUsers: 0,
+      newUsersThisMonth: 0,
+    };
   },
 
   /**
@@ -192,28 +199,34 @@ export const adminApi = {
    * Ban a user
    */
   async banUser(userId: number, reason?: string): Promise<void> {
-    await apiClient.post(`/api/admin/users/${userId}/ban`, { reason });
+    await apiClient.put(`/api/admin/users/${userId}/ban`, { reason });
   },
 
   /**
    * Unban a user
    */
   async unbanUser(userId: number): Promise<void> {
-    await apiClient.post(`/api/admin/users/${userId}/unban`);
+    await apiClient.put(`/api/admin/users/${userId}/unban`);
   },
 
   /**
    * Promote user to admin
+   * TODO: Backend endpoint not implemented yet
    */
-  async promoteToAdmin(userId: number): Promise<void> {
-    await apiClient.post(`/api/admin/users/${userId}/promote`);
+  async promoteToAdmin(_userId: number): Promise<void> {
+    console.warn('[Admin API] promoteToAdmin endpoint not implemented in backend');
+    throw new Error('Promote to admin feature not yet implemented');
+    // await apiClient.put(`/api/admin/users/${_userId}/promote`);
   },
 
   /**
    * Demote admin to user
+   * TODO: Backend endpoint not implemented yet
    */
-  async demoteFromAdmin(userId: number): Promise<void> {
-    await apiClient.post(`/api/admin/users/${userId}/demote`);
+  async demoteFromAdmin(_userId: number): Promise<void> {
+    console.warn('[Admin API] demoteFromAdmin endpoint not implemented in backend');
+    throw new Error('Demote from admin feature not yet implemented');
+    // await apiClient.put(`/api/admin/users/${_userId}/demote`);
   },
 
   /**
@@ -240,7 +253,7 @@ export const adminApi = {
    * Resolve a report
    */
   async resolveReport(reportId: number, action: string, notes?: string): Promise<void> {
-    await apiClient.post(`/api/admin/reports/${reportId}/resolve`, {
+    await apiClient.put(`/api/admin/reports/${reportId}/resolve`, {
       action,
       adminNotes: notes,
     });
@@ -250,17 +263,24 @@ export const adminApi = {
    * Dismiss a report
    */
   async dismissReport(reportId: number, reason?: string): Promise<void> {
-    await apiClient.post(`/api/admin/reports/${reportId}/dismiss`, { reason });
+    await apiClient.put(`/api/admin/reports/${reportId}/dismiss`, { reason });
   },
 
   /**
    * Get analytics data
+   * TODO: Backend endpoint not implemented yet
    */
-  async getAnalytics(period: string = '7d'): Promise<any> {
-    const response = await apiClient.get('/api/admin/analytics', {
-      params: { period },
-    });
-    return response.data;
+  async getAnalytics(_period: string = '7d'): Promise<any> {
+    console.warn('[Admin API] getAnalytics endpoint not implemented in backend');
+    return {
+      views: [],
+      registrations: [],
+      reviews: [],
+    };
+    // const response = await apiClient.get('/api/admin/analytics', {
+    //   params: { period: _period },
+    // });
+    // return response.data;
   },
 };
 
