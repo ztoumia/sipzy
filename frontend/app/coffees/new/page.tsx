@@ -66,7 +66,7 @@ export default function NewCoffeePage() {
 
   // Vérifier l'authentification
   useEffect(() => {
-    const authToken = localStorage.getItem('auth_token');
+    const authToken = localStorage.getItem('authToken');
     if (!authToken) {
       localStorage.setItem('redirect_after_login', '/coffees/new');
       router.push('/auth/login');
@@ -95,7 +95,7 @@ export default function NewCoffeePage() {
       } catch (e) {
         toast.error('Session invalide', 'Veuillez vous reconnecter');
         localStorage.removeItem('user');
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('authToken');
         router.push('/auth/login');
         return;
       }

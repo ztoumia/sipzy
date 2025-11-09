@@ -11,7 +11,7 @@ export default function AddReviewButton({ coffeeId }: { coffeeId: number }) {
 
   const handleClick = () => {
     // Vérifier si l'utilisateur est connecté
-    const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
     if (!authToken) {
       // Sauvegarder l'URL actuelle pour rediriger après login
