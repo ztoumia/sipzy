@@ -52,11 +52,21 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "Déconnexion", description = "Se déconnecter (invalider le token)")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<Void> logout(
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
         log.info("Logout request");
 
-        String token = JwtUtil.extractTokenFromHeader(authHeader);
-        authService.logout(token);
+        // If token is provided, log it (for future blacklist implementation)
+        if (authHeader != null && !authHeader.isEmpty()) {
+            try {
+                String token = JwtUtil.extractTokenFromHeader(authHeader);
+                authService.logout(token);
+            } catch (Exception e) {
+                // Ignore token extraction errors during logout
+                log.debug("Could not extract token during logout (token may be expired): {}", e.getMessage());
+            }
+        }
 
         return ResponseEntity.noContent().build();
     }
