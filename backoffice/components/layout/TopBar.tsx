@@ -3,17 +3,21 @@
 import { Bell, Menu, Settings, LogOut, User } from 'lucide-react';
 import { useAdminSidebar } from '@/contexts/AdminSidebarContext';
 import { useRouter } from 'next/navigation';
+import { removeAuthToken } from '@sipzy/shared/lib/api/apiClient';
 
 export function TopBar() {
   const { toggle, toggleMobile } = useAdminSidebar();
   const router = useRouter();
 
   const handleLogout = () => {
-    // Clear auth token and user data (matching apiClient.ts implementation)
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    // Redirect to login
-    router.push('/login');
+    // Clear auth token and user data
+    removeAuthToken();
+
+    // Clear auth cookie if exists
+    document.cookie = 'authToken=; path=/; max-age=0';
+
+    // Redirect to login (using window.location for full page reload)
+    window.location.href = '/login';
   };
 
   return (
