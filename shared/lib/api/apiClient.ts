@@ -380,6 +380,26 @@ export function removeAuthToken() {
 }
 
 /**
+ * Logout user (call backend endpoint + clean client storage)
+ * Use this instead of removeAuthToken() for proper logout
+ */
+export async function logout(): Promise<void> {
+  try {
+    // Call backend logout endpoint for logging/audit
+    // Don't await to avoid blocking if backend is down
+    apiClient.post('/api/auth/logout').catch((error) => {
+      console.warn('[Auth] Backend logout failed (continuing anyway):', error.message);
+    });
+  } catch (error) {
+    // Ignore errors - continue with client-side cleanup
+    console.warn('[Auth] Logout error:', error);
+  }
+
+  // Clean client-side storage
+  removeAuthToken();
+}
+
+/**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
