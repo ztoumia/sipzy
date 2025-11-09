@@ -50,9 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(verifiedUser);
           // S'assurer que le cookie est aussi défini
           document.cookie = `authToken=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 jours
+        } else {
+          // Si pas de token en localStorage, nettoyer le cookie aussi
+          document.cookie = 'authToken=; path=/; max-age=0';
         }
       } catch (error) {
         console.error('Error verifying token:', error);
+        // Nettoyer TOUS les tokens (localStorage + cookie)
         removeAuthToken();
         document.cookie = 'authToken=; path=/; max-age=0';
       } finally {
