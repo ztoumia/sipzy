@@ -9,8 +9,9 @@ export function TopBar() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Clear auth token
-    localStorage.removeItem('token');
+    // Clear auth token and user data (matching apiClient.ts implementation)
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     // Redirect to login
     router.push('/login');
   };
@@ -57,7 +58,7 @@ export function TopBar() {
 
         {/* Settings */}
         <button
-          onClick={() => router.push('/admin/settings')}
+          onClick={() => router.push('/settings')}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           aria-label="Settings"
         >
@@ -88,7 +89,7 @@ export function TopBar() {
             <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <div className="p-2">
                 <button
-                  onClick={() => router.push('/admin/settings')}
+                  onClick={() => router.push('/settings')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                 >
                   <Settings className="w-4 h-4" />
