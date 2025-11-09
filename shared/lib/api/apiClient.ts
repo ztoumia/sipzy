@@ -386,8 +386,8 @@ export function removeAuthToken() {
 export async function logout(): Promise<void> {
   try {
     // Call backend logout endpoint for logging/audit
-    // Don't await to avoid blocking if backend is down
-    apiClient.post('/api/auth/logout').catch((error) => {
+    // Await to ensure token is sent before cleanup
+    await apiClient.post('/api/auth/logout').catch((error) => {
       console.warn('[Auth] Backend logout failed (continuing anyway):', error.message);
     });
   } catch (error) {
@@ -395,7 +395,7 @@ export async function logout(): Promise<void> {
     console.warn('[Auth] Logout error:', error);
   }
 
-  // Clean client-side storage
+  // Clean client-side storage AFTER backend call
   removeAuthToken();
 }
 
