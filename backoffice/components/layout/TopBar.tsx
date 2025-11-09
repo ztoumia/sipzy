@@ -3,15 +3,15 @@
 import { Bell, Menu, Settings, LogOut, User } from 'lucide-react';
 import { useAdminSidebar } from '@/contexts/AdminSidebarContext';
 import { useRouter } from 'next/navigation';
-import { removeAuthToken } from '@sipzy/shared/lib/api/apiClient';
+import { logout } from '@sipzy/shared/lib/api/apiClient';
 
 export function TopBar() {
   const { toggle, toggleMobile } = useAdminSidebar();
   const router = useRouter();
 
-  const handleLogout = () => {
-    // Clear auth token and user data
-    removeAuthToken();
+  const handleLogout = async () => {
+    // Call API logout endpoint + clean client storage
+    await logout();
 
     // Clear auth cookie if exists
     document.cookie = 'authToken=; path=/; max-age=0';
