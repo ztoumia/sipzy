@@ -61,7 +61,6 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from builder
-COPY --from=builder /app/backoffice/public ./public
 COPY --from=builder /app/backoffice/.next/standalone ./
 COPY --from=builder /app/backoffice/.next/static ./.next/static
 
