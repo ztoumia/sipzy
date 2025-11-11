@@ -3,17 +3,16 @@
 # ========================================
 FROM node:20-alpine AS deps
 
-# Install libc6-compat for Alpine compatibility
-RUN apk add --no-cache libc6-compat
+# Installer libs nécessaires pour compiler certains modules natifs
+RUN apk add --no-cache libc6-compat python3 make g++ 
 
 WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production && \
-    npm cache clean --force
+# Installer toutes les dépendances (prod + dev)
+RUN npm ci && npm cache clean --force
 
 # ========================================
 # Stage 2: Builder
