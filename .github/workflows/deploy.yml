@@ -9,6 +9,7 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
+      - 'backoffice/**'
       - '.github/workflows/deploy.yml'
   pull_request:
     branches:
@@ -17,10 +18,11 @@ on:
     paths:
       - 'backend/**'
       - 'frontend/**'
+      - 'backoffice/**'
   workflow_dispatch:
     inputs:
       service:
-        description: 'Service to deploy (backend, frontend, or all)'
+        description: 'Service to deploy (backend, frontend, backoffice, or all)'
         required: true
         default: 'all'
         type: choice
@@ -28,11 +30,13 @@ on:
           - all
           - backend
           - frontend
+          - backoffice
 
 env:
   DOCKER_REGISTRY: ${{ secrets.DOCKER_USERNAME }}
   BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backend
   FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-frontend
+  BACKOFFICE_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backoffice
 
 jobs:
   # ========================================
@@ -44,6 +48,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      backoffice: ${{ steps.filter.outputs.backoffice }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,11 +66,15 @@ jobs:
             frontend:
               - 'frontend/**'
               - '.github/workflows/deploy.yml'
+            backoffice:
+              - 'backoffice/**'
+              - '.github/workflows/deploy.yml'
 
       - name: Display detection results
         run: |
           echo "Backend changed: ${{ steps.filter.outputs.backend }}"
           echo "Frontend changed: ${{ steps.filter.outputs.frontend }}"
+          echo "Backoffice changed: ${{ steps.filter.outputs.backoffice }}"
           echo "Manual trigger service: ${{ github.event.inputs.service }}"
 
   # ========================================
@@ -73,7 +82,7 @@ jobs:
   # ========================================
   build-backend:
     name: Build and Push Backend
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.backend == 'true' ||
@@ -127,7 +136,7 @@ jobs:
   # ========================================
   build-frontend:
     name: Build and Push Frontend
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.frontend == 'true' ||
@@ -177,18 +186,73 @@ jobs:
         run: echo "Frontend image digest ${{ steps.meta.outputs.digest }}"
 
   # ========================================
+  # Job: Build and Push Backoffice
+  # ========================================
+  build-backoffice:
+    name: Build and Push Backoffice
+    runs-on: self-hosted
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.backoffice == 'true' ||
+      github.event.inputs.service == 'backoffice' ||
+      github.event.inputs.service == 'all'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BACKOFFICE_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Backoffice
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backoffice
+          file: ./backoffice/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache,mode=max
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
+
+      - name: Image digest
+        run: echo "Backoffice image digest ${{ steps.meta.outputs.digest }}"
+
+  # ========================================
   # Job: Security Scan
   # ========================================
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
-    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success')
+    needs: [build-backend, build-frontend, build-backoffice]
+    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success' || needs.build-backoffice.result == 'success')
     strategy:
       matrix:
         image:
           - ${{ needs.build-backend.result == 'success' && 'backend' || '' }}
           - ${{ needs.build-frontend.result == 'success' && 'frontend' || '' }}
+          - ${{ needs.build-backoffice.result == 'success' && 'backoffice' || '' }}
         exclude:
           - image: ''
     steps:
@@ -213,7 +277,7 @@ jobs:
   deployment-summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
+    needs: [build-backend, build-frontend, build-backoffice]
     if: always()
     steps:
       - name: Create deployment summary
@@ -231,12 +295,20 @@ jobs:
             echo "| Backend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [ "${{ needs.build-frontend.result }}" == "success" ]; then
-            echo "| Frontend | ✅ Success | \`${{ env.FRONTEND_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-frontend.result }}" == "skipped" ]; then
-            echo "| Frontend | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
+            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
+            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Frontend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
+            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
+            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
