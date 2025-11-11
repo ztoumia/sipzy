@@ -118,7 +118,7 @@ services:
       start_period: 60s
 
   # ========================================
-  # Frontend (Next.js)
+  # Frontend (Next.js).
   # ========================================
   frontend:
     build:
