@@ -44,7 +44,7 @@ jobs:
   # ========================================
   detect-changes:
     name: Detect Changed Services
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -244,7 +244,7 @@ jobs:
   # ========================================
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build-backend, build-frontend, build-backoffice]
     if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success' || needs.build-backoffice.result == 'success')
     strategy:
@@ -276,7 +276,7 @@ jobs:
   # ========================================
   deployment-summary:
     name: Deployment Summary
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [build-backend, build-frontend, build-backoffice]
     if: always()
     steps:
