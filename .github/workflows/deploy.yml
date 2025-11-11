@@ -32,6 +32,11 @@ on:
           - frontend
           - backoffice
 
+# Required permissions for paths-filter and GitHub API access
+permissions:
+  contents: read
+  pull-requests: read
+
 env:
   DOCKER_REGISTRY: ${{ secrets.DOCKER_USERNAME }}
   BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backend
@@ -111,7 +116,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Backend
@@ -165,7 +170,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Frontend
@@ -173,6 +178,8 @@ jobs:
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
+          build-contexts: |
+            shared=./shared
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -219,7 +226,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Backoffice
@@ -227,6 +234,8 @@ jobs:
         with:
           context: ./backoffice
           file: ./backoffice/Dockerfile
+          build-contexts: |
+            shared=./shared
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

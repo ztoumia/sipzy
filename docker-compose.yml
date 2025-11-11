@@ -124,6 +124,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
     image: ${DOCKER_REGISTRY:-ztoumia}/sipzy-frontend:${FRONTEND_VERSION:-latest}
@@ -161,6 +163,8 @@ services:
     build:
       context: ./backoffice
       dockerfile: Dockerfile
+      additional_contexts:
+        shared: ./shared
       args:
         - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8080}
         - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
