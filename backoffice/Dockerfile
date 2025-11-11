@@ -8,11 +8,13 @@ RUN apk add --no-cache libc6-compat python3 make g++
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Copy shared package files and install its dependencies
+COPY --from=shared package*.json ./shared/
+RUN cd shared && npm ci && npm cache clean --force
 
-# Installer **toutes les dépendances** (dev + prod) pour le build
-RUN npm ci && npm cache clean --force
+# Copy backoffice package files and install its dependencies
+COPY package.json package-lock.json* ./backoffice/
+RUN cd backoffice && npm ci && npm cache clean --force
 
 # ========================================
 # Stage 2: Builder
@@ -21,17 +23,26 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy shared package from additional build context (injected via build-contexts in GitHub Actions)
+COPY --from=shared . ./shared/
 
-# Copy application files
-COPY . .
+# Copy shared dependencies from deps stage
+COPY --from=deps /app/shared/node_modules ./shared/node_modules
+
+# Copy backoffice application files from main context
+COPY . ./backoffice/
+
+# Copy backoffice dependencies from deps stage
+COPY --from=deps /app/backoffice/node_modules ./backoffice/node_modules
+
+# Set working directory to backoffice for build
+WORKDIR /app/backoffice
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build the application
+# Build the application (tsconfig paths will resolve @sipzy/shared to ../shared)
 RUN npm run build
 
 # ========================================
@@ -50,9 +61,9 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy necessary files from builder
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/backoffice/public ./public
+COPY --from=builder /app/backoffice/.next/standalone ./
+COPY --from=builder /app/backoffice/.next/static ./.next/static
 
 # Change ownership
 RUN chown -R nextjs:nodejs /app
