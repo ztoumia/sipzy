@@ -4,7 +4,7 @@
 FROM node:20-alpine AS deps
 
 # Installer libs nécessaires pour compiler certains modules natifs
-RUN apk add --no-cache libc6-compat python3 make g++
+RUN apk add --no-cache libc6-compat python3 make g++ 
 
 WORKDIR /app
 
