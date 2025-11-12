@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'jacoco'  // Code coverage plugin
+    id 'org.sonarqube' version '4.4.1.3373'  // SonarQube analysis plugin
 }
 
 group = 'com.sipzy'
@@ -71,4 +73,89 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport  // Generate JaCoCo report after tests
+}
+
+// ========================================
+// JaCoCo Configuration
+// ========================================
+// Code coverage tool for Java
+jacoco {
+    toolVersion = "0.8.11"  // Latest JaCoCo version compatible with Java 21
+}
+
+jacocoTestReport {
+    dependsOn test  // Tests must run before generating report
+
+    reports {
+        // Generate XML report for SonarQube
+        xml.required = true
+        xml.destination = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+
+        // Generate HTML report for human readability
+        html.required = true
+        html.destination = file("${buildDir}/reports/jacoco/test/html")
+
+        // Generate CSV report (optional)
+        csv.required = false
+    }
+
+    // Optional: Exclude certain classes from coverage
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                '**/config/**',      // Exclude configuration classes
+                '**/dto/**',         // Exclude DTOs
+                '**/entity/**',      // Exclude entities
+                '**/*Application*'   // Exclude main application class
+            ])
+        }))
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.50  // Minimum 50% code coverage
+            }
+        }
+    }
+}
+
+// ========================================
+// SonarQube Configuration
+// ========================================
+// Code quality and security analysis
+sonar {
+    properties {
+        // SonarQube server URL (configured via command line or CI/CD)
+        // property "sonar.host.url", "http://sonarqube:9001"
+
+        // Project identification
+        property "sonar.projectKey", "sipzy-backend"
+        property "sonar.projectName", "Sipzy Backend"
+        property "sonar.projectVersion", version
+
+        // Source and binary directories
+        property "sonar.sources", "src/main/java"
+        property "sonar.tests", "src/test/java"
+        property "sonar.java.binaries", "${buildDir}/classes/java/main"
+        property "sonar.java.test.binaries", "${buildDir}/classes/java/test"
+
+        // Coverage report paths
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.junit.reportPaths", "${buildDir}/test-results/test"
+
+        // Java version
+        property "sonar.java.source", "21"
+        property "sonar.java.target", "21"
+
+        // Encoding
+        property "sonar.sourceEncoding", "UTF-8"
+
+        // Exclusions (optional - adjust as needed)
+        property "sonar.exclusions", "**/config/**,**/dto/**,**/entity/**,**/*Application.java"
+        property "sonar.coverage.exclusions", "**/config/**,**/dto/**,**/entity/**"
+    }
 }

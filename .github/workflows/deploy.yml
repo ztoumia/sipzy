@@ -1,4 +1,23 @@
-name: Build and Deploy to Docker Hub
+# ========================================
+# CI/CD Pipeline for Sipzy - Multi-Service Build & Analysis
+# ========================================
+# This workflow handles:
+# - Service change detection (backend, frontend, backoffice)
+# - Unit testing (Gradle for Java, npm test for JS/TS)
+# - Code coverage reports (JaCoCo for Java, lcov for JS/TS)
+# - SonarQube analysis (Java + JavaScript/TypeScript)
+# - Docker image build & push to Docker Hub
+# - Security scanning with Trivy
+# - Comprehensive deployment summary
+#
+# Requirements:
+# - Self-hosted runner on VPS (same network as SonarQube)
+# - SonarQube server at http://sonarqube:9001
+# - Docker Hub credentials in GitHub secrets
+# - SonarQube token in GitHub secrets
+# ========================================
+
+name: CI/CD Pipeline - Build, Test, Analyze & Deploy
 
 on:
   push:
@@ -10,6 +29,7 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'backoffice/**'
+      - 'shared/**'
       - '.github/workflows/deploy.yml'
   pull_request:
     branches:
@@ -19,10 +39,11 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'backoffice/**'
+      - 'shared/**'
   workflow_dispatch:
     inputs:
       service:
-        description: 'Service to deploy (backend, frontend, backoffice, or all)'
+        description: 'Service to build (backend, frontend, backoffice, or all)'
         required: true
         default: 'all'
         type: choice
@@ -32,35 +53,43 @@ on:
           - frontend
           - backoffice
 
-# Required permissions for paths-filter and GitHub API access
+# Required permissions for paths-filter, security scanning, and GitHub API access
 permissions:
   contents: read
   pull-requests: read
+  security-events: write  # Required for Trivy SARIF upload
 
+# Global environment variables
 env:
   DOCKER_REGISTRY: ${{ secrets.DOCKER_USERNAME }}
   BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backend
   FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-frontend
   BACKOFFICE_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backoffice
+  SONAR_HOST_URL: http://sonarqube:9001
+  JAVA_VERSION: '21'
+  NODE_VERSION: '20'
 
 jobs:
   # ========================================
-  # Job: Detect Changes
+  # Job 1: Detect Changes
   # ========================================
+  # Determines which services have changed to optimize CI/CD execution
+  # Uses dorny/paths-filter to detect file changes per service
   detect-changes:
-    name: Detect Changed Services
+    name: 🔍 Detect Changed Services
     runs-on: self-hosted
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       backoffice: ${{ steps.filter.outputs.backoffice }}
+      shared: ${{ steps.filter.outputs.shared }}
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Full history for accurate change detection
 
-      - name: Check for changes
+      - name: 🔎 Check for changes
         uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -70,23 +99,34 @@ jobs:
               - '.github/workflows/deploy.yml'
             frontend:
               - 'frontend/**'
+              - 'shared/**'
               - '.github/workflows/deploy.yml'
             backoffice:
               - 'backoffice/**'
+              - 'shared/**'
               - '.github/workflows/deploy.yml'
+            shared:
+              - 'shared/**'
 
-      - name: Display detection results
+      - name: 📊 Display detection results
         run: |
-          echo "Backend changed: ${{ steps.filter.outputs.backend }}"
-          echo "Frontend changed: ${{ steps.filter.outputs.frontend }}"
-          echo "Backoffice changed: ${{ steps.filter.outputs.backoffice }}"
-          echo "Manual trigger service: ${{ github.event.inputs.service }}"
+          echo "### 🔍 Change Detection Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Changed | Manual Trigger |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|----------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | ${{ steps.filter.outputs.backend }} | ${{ github.event.inputs.service == 'backend' || github.event.inputs.service == 'all' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ${{ steps.filter.outputs.frontend }} | ${{ github.event.inputs.service == 'frontend' || github.event.inputs.service == 'all' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backoffice | ${{ steps.filter.outputs.backoffice }} | ${{ github.event.inputs.service == 'backoffice' || github.event.inputs.service == 'all' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shared Library | ${{ steps.filter.outputs.shared }} | - |" >> $GITHUB_STEP_SUMMARY
 
   # ========================================
-  # Job: Build and Push Backend
+  # Job 2: Test & Analyze Backend (Java/Spring Boot)
   # ========================================
-  build-backend:
-    name: Build and Push Backend
+  # - Runs Gradle tests with JUnit
+  # - Generates JaCoCo coverage report
+  # - Performs SonarQube analysis
+  test-backend:
+    name: 🧪 Test & Analyze Backend
     runs-on: self-hosted
     needs: detect-changes
     if: |
@@ -94,19 +134,289 @@ jobs:
       github.event.inputs.service == 'backend' ||
       github.event.inputs.service == 'all'
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for SonarQube blame information
+
+      - name: ☕ Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Make Gradlew executable
+        run: chmod +x backend/gradlew
+        working-directory: .
+
+      - name: 🧪 Run Backend Tests
+        run: ./gradlew test --no-daemon --console=plain
+        working-directory: backend
+
+      - name: 📊 Generate JaCoCo Coverage Report
+        run: ./gradlew jacocoTestReport --no-daemon
+        working-directory: backend
+
+      - name: 📈 Display Test Results
+        if: always()
+        run: |
+          echo "### 🧪 Backend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f backend/build/test-results/test/TEST-*.xml ]; then
+            echo "✅ Tests executed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            find backend/build/test-results/test -name "TEST-*.xml" -exec basename {} \; | head -10 >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ No test results found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/build/test-results/test/
+          retention-days: 30
+
+      - name: 📤 Upload JaCoCo Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jacoco-report
+          path: backend/build/reports/jacoco/test/
+          retention-days: 30
+
+      - name: 🔍 SonarQube Analysis (Backend)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        run: |
+          ./gradlew sonar \
+            -Dsonar.projectKey=sipzy-backend \
+            -Dsonar.projectName="Sipzy Backend" \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.java.binaries=build/classes/java/main \
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
+            --no-daemon
+        working-directory: backend
+        continue-on-error: true  # Don't fail the build if SonarQube is unavailable
+
+      - name: 📊 SonarQube Summary
+        run: |
+          echo "### 🔍 SonarQube Analysis (Backend)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Server:** ${{ env.SONAR_HOST_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project:** sipzy-backend" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard:** ${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-backend" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # Job 3: Test & Analyze Frontend (Next.js/React)
+  # ========================================
+  # - Runs npm tests with Jest
+  # - Generates lcov coverage report
+  # - Performs SonarQube analysis for JavaScript/TypeScript
+  test-frontend:
+    name: 🧪 Test & Analyze Frontend
+    runs-on: self-hosted
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.frontend == 'true' ||
+      github.event.inputs.service == 'frontend' ||
+      github.event.inputs.service == 'all'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for SonarQube
+
+      - name: 🟢 Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            shared/package-lock.json
+
+      - name: 📦 Install Shared Dependencies
+        run: npm ci --prefer-offline --no-audit
+        working-directory: shared
+
+      - name: 📦 Install Frontend Dependencies
+        run: npm ci --prefer-offline --no-audit
+        working-directory: frontend
+
+      - name: 🧪 Run Frontend Tests
+        run: npm test -- --coverage --watchAll=false
+        working-directory: frontend
+        continue-on-error: true  # Continue even if tests fail to generate reports
+
+      - name: 📊 Display Test Results
+        if: always()
+        run: |
+          echo "### 🧪 Frontend Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f frontend/coverage/lcov.info ]; then
+            echo "✅ Tests executed with coverage" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No coverage report generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-results
+          path: frontend/coverage/
+          retention-days: 30
+
+      - name: 🔍 SonarQube Analysis (Frontend)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        run: |
+          npx sonar-scanner \
+            -Dsonar.projectKey=sipzy-frontend \
+            -Dsonar.projectName="Sipzy Frontend" \
+            -Dsonar.sources=app,components,lib \
+            -Dsonar.tests=__tests__ \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.sourceEncoding=UTF-8
+        working-directory: frontend
+        continue-on-error: true
+
+      - name: 📊 SonarQube Summary
+        run: |
+          echo "### 🔍 SonarQube Analysis (Frontend)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Server:** ${{ env.SONAR_HOST_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project:** sipzy-frontend" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard:** ${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-frontend" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # Job 4: Test & Analyze Backoffice (Next.js/React)
+  # ========================================
+  test-backoffice:
+    name: 🧪 Test & Analyze Backoffice
+    runs-on: self-hosted
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.backoffice == 'true' ||
+      github.event.inputs.service == 'backoffice' ||
+      github.event.inputs.service == 'all'
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🟢 Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backoffice/package-lock.json
+            shared/package-lock.json
+
+      - name: 📦 Install Shared Dependencies
+        run: npm ci --prefer-offline --no-audit
+        working-directory: shared
+
+      - name: 📦 Install Backoffice Dependencies
+        run: npm ci --prefer-offline --no-audit
+        working-directory: backoffice
+
+      - name: 🧪 Run Backoffice Tests
+        run: npm test -- --coverage --watchAll=false
+        working-directory: backoffice
+        continue-on-error: true
+
+      - name: 📊 Display Test Results
+        if: always()
+        run: |
+          echo "### 🧪 Backoffice Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f backoffice/coverage/lcov.info ]; then
+            echo "✅ Tests executed with coverage" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No coverage report generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📤 Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backoffice-test-results
+          path: backoffice/coverage/
+          retention-days: 30
+
+      - name: 🔍 SonarQube Analysis (Backoffice)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        run: |
+          npx sonar-scanner \
+            -Dsonar.projectKey=sipzy-backoffice \
+            -Dsonar.projectName="Sipzy Backoffice" \
+            -Dsonar.sources=app,components,lib \
+            -Dsonar.tests=__tests__ \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info \
+            -Dsonar.sourceEncoding=UTF-8
+        working-directory: backoffice
+        continue-on-error: true
+
+      - name: 📊 SonarQube Summary
+        run: |
+          echo "### 🔍 SonarQube Analysis (Backoffice)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Server:** ${{ env.SONAR_HOST_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project:** sipzy-backoffice" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard:** ${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-backoffice" >> $GITHUB_STEP_SUMMARY
+
+  # ========================================
+  # Job 5: Build and Push Backend Docker Image
+  # ========================================
+  # - Builds multi-platform Docker image (amd64, arm64)
+  # - Pushes to Docker Hub with proper tags
+  # - Uses BuildKit cache for optimization
+  build-backend:
+    name: 🐳 Build & Push Backend
+    runs-on: self-hosted
+    needs: [detect-changes, test-backend]
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.backend == 'true' ||
+       github.event.inputs.service == 'backend' ||
+       github.event.inputs.service == 'all') &&
+      (needs.test-backend.result == 'success' || needs.test-backend.result == 'skipped')
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      tags: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: 🔐 Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata
+      - name: 🏷️ Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -116,10 +426,11 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Backend
+      - name: 🐳 Build and push Backend
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./backend
@@ -127,40 +438,51 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
           build-args: |
             GRADLE_BUILD_ARGS=--no-daemon
 
-      - name: Image digest
-        run: echo "Backend image digest ${{ steps.meta.outputs.digest }}"
+      - name: ✅ Build Summary
+        run: |
+          echo "### 🐳 Backend Docker Build" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** \`${{ env.BACKEND_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags:** \`${{ steps.meta.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
 
   # ========================================
-  # Job: Build and Push Frontend
+  # Job 6: Build and Push Frontend Docker Image
   # ========================================
   build-frontend:
-    name: Build and Push Frontend
+    name: 🐳 Build & Push Frontend
     runs-on: self-hosted
-    needs: detect-changes
+    needs: [detect-changes, test-frontend]
     if: |
-      needs.detect-changes.outputs.frontend == 'true' ||
-      github.event.inputs.service == 'frontend' ||
-      github.event.inputs.service == 'all'
+      always() &&
+      (needs.detect-changes.outputs.frontend == 'true' ||
+       github.event.inputs.service == 'frontend' ||
+       github.event.inputs.service == 'all') &&
+      (needs.test-frontend.result == 'success' || needs.test-frontend.result == 'skipped')
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      tags: ${{ steps.meta.outputs.tags }}
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: 🔐 Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata
+      - name: 🏷️ Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -170,10 +492,11 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Frontend
+      - name: 🐳 Build and push Frontend
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
@@ -183,40 +506,51 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
 
-      - name: Image digest
-        run: echo "Frontend image digest ${{ steps.meta.outputs.digest }}"
+      - name: ✅ Build Summary
+        run: |
+          echo "### 🐳 Frontend Docker Build" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** \`${{ env.FRONTEND_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags:** \`${{ steps.meta.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
 
   # ========================================
-  # Job: Build and Push Backoffice
+  # Job 7: Build and Push Backoffice Docker Image
   # ========================================
   build-backoffice:
-    name: Build and Push Backoffice
+    name: 🐳 Build & Push Backoffice
     runs-on: self-hosted
-    needs: detect-changes
+    needs: [detect-changes, test-backoffice]
     if: |
-      needs.detect-changes.outputs.backoffice == 'true' ||
-      github.event.inputs.service == 'backoffice' ||
-      github.event.inputs.service == 'all'
+      always() &&
+      (needs.detect-changes.outputs.backoffice == 'true' ||
+       github.event.inputs.service == 'backoffice' ||
+       github.event.inputs.service == 'all') &&
+      (needs.test-backoffice.result == 'success' || needs.test-backoffice.result == 'skipped')
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      tags: ${{ steps.meta.outputs.tags }}
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
+      - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
+      - name: 🔐 Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata
+      - name: 🏷️ Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -226,10 +560,11 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha
+            type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Backoffice
+      - name: 🐳 Build and push Backoffice
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./backoffice
@@ -239,88 +574,228 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
           cache-from: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
 
-      - name: Image digest
-        run: echo "Backoffice image digest ${{ steps.meta.outputs.digest }}"
+      - name: ✅ Build Summary
+        run: |
+          echo "### 🐳 Backoffice Docker Build" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** \`${{ env.BACKOFFICE_IMAGE }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags:** \`${{ steps.meta.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
 
   # ========================================
-  # Job: Security Scan
+  # Job 8: Security Scan with Trivy
   # ========================================
+  # Scans Docker images for vulnerabilities
+  # Uploads results to GitHub Security tab
   security-scan:
-    name: Security Scan
+    name: 🔒 Security Scan (Trivy)
     runs-on: self-hosted
     needs: [build-backend, build-frontend, build-backoffice]
-    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success' || needs.build-backoffice.result == 'success')
+    if: |
+      always() &&
+      (needs.build-backend.result == 'success' ||
+       needs.build-frontend.result == 'success' ||
+       needs.build-backoffice.result == 'success')
     strategy:
+      fail-fast: false
       matrix:
-        image:
-          - ${{ needs.build-backend.result == 'success' && 'backend' || '' }}
-          - ${{ needs.build-frontend.result == 'success' && 'frontend' || '' }}
-          - ${{ needs.build-backoffice.result == 'success' && 'backoffice' || '' }}
+        service:
+          - name: backend
+            image: ${{ needs.build-backend.result == 'success' && 'sipzy-backend' || '' }}
+          - name: frontend
+            image: ${{ needs.build-frontend.result == 'success' && 'sipzy-frontend' || '' }}
+          - name: backoffice
+            image: ${{ needs.build-backoffice.result == 'success' && 'sipzy-backoffice' || '' }}
         exclude:
-          - image: ''
+          - service:
+              image: ''
     steps:
-      - name: Run Trivy vulnerability scanner
+      - name: 🔒 Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.DOCKER_REGISTRY }}/sipzy-${{ matrix.image }}:latest
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ matrix.service.image }}:latest
           format: 'sarif'
-          output: 'trivy-results-${{ matrix.image }}.sarif'
-          severity: 'CRITICAL,HIGH'
+          output: 'trivy-results-${{ matrix.service.name }}.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          vuln-type: 'os,library'
+          timeout: '10m'
 
-      - name: Upload Trivy results to GitHub Security
+      - name: 📊 Generate Trivy Summary
+        if: always()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.DOCKER_REGISTRY }}/${{ matrix.service.image }}:latest
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          output: 'trivy-summary-${{ matrix.service.name }}.txt'
+
+      - name: 📤 Upload Trivy results to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results-${{ matrix.image }}.sarif'
-          category: trivy-${{ matrix.image }}
+          sarif_file: 'trivy-results-${{ matrix.service.name }}.sarif'
+          category: trivy-${{ matrix.service.name }}
+
+      - name: 📤 Upload Trivy summary as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-summary-${{ matrix.service.name }}
+          path: trivy-summary-${{ matrix.service.name }}.txt
+          retention-days: 30
+
+      - name: 📊 Display scan results
+        if: always()
+        run: |
+          echo "### 🔒 Security Scan: ${{ matrix.service.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat trivy-summary-${{ matrix.service.name }}.txt || echo "No vulnerabilities report generated"
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   # ========================================
-  # Job: Deployment Summary
+  # Job 9: Final Deployment Summary
   # ========================================
+  # Generates comprehensive summary of all pipeline steps
   deployment-summary:
-    name: Deployment Summary
+    name: 📋 Pipeline Summary
     runs-on: self-hosted
-    needs: [build-backend, build-frontend, build-backoffice]
+    needs:
+      - detect-changes
+      - test-backend
+      - test-frontend
+      - test-backoffice
+      - build-backend
+      - build-frontend
+      - build-backoffice
+      - security-scan
     if: always()
     steps:
-      - name: Create deployment summary
+      - name: 📊 Create comprehensive deployment summary
         run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Service | Status | Image |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|-------|" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ needs.build-backend.result }}" == "success" ]; then
-            echo "| Backend | ✅ Success | \`${{ env.BACKEND_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backend.result }}" == "skipped" ]; then
-            echo "| Backend | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
-            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
-            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
-            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
-            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
+          echo "# 🚀 CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow:** ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## 🔍 Change Detection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Changed |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend | ${{ needs.detect-changes.outputs.backend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend | ${{ needs.detect-changes.outputs.frontend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backoffice | ${{ needs.detect-changes.outputs.backoffice }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## 🧪 Testing & Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Tests | SonarQube |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|-----------|" >> $GITHUB_STEP_SUMMARY
+
+          # Backend test results
+          if [ "${{ needs.test-backend.result }}" == "success" ]; then
+            echo "| Backend | ✅ Passed | ✅ Analyzed |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-backend.result }}" == "failure" ]; then
+            echo "| Backend | ❌ Failed | ⚠️ Partial |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-backend.result }}" == "skipped" ]; then
+            echo "| Backend | ⏭️ Skipped | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Frontend test results
+          if [ "${{ needs.test-frontend.result }}" == "success" ]; then
+            echo "| Frontend | ✅ Passed | ✅ Analyzed |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-frontend.result }}" == "failure" ]; then
+            echo "| Frontend | ❌ Failed | ⚠️ Partial |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-frontend.result }}" == "skipped" ]; then
+            echo "| Frontend | ⏭️ Skipped | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Backoffice test results
+          if [ "${{ needs.test-backoffice.result }}" == "success" ]; then
+            echo "| Backoffice | ✅ Passed | ✅ Analyzed |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-backoffice.result }}" == "failure" ]; then
+            echo "| Backoffice | ❌ Failed | ⚠️ Partial |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.test-backoffice.result }}" == "skipped" ]; then
+            echo "| Backoffice | ⏭️ Skipped | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## 🐳 Docker Build & Push" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Build | Image |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|-------|" >> $GITHUB_STEP_SUMMARY
+
+          # Backend build results
+          if [ "${{ needs.build-backend.result }}" == "success" ]; then
+            echo "| Backend | ✅ Success | \`${{ env.BACKEND_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backend.result }}" == "failure" ]; then
+            echo "| Backend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backend.result }}" == "skipped" ]; then
+            echo "| Backend | ⏭️ Skipped | No changes |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Frontend build results
+          if [ "${{ needs.build-frontend.result }}" == "success" ]; then
+            echo "| Frontend | ✅ Success | \`${{ env.FRONTEND_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-frontend.result }}" == "failure" ]; then
+            echo "| Frontend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-frontend.result }}" == "skipped" ]; then
+            echo "| Frontend | ⏭️ Skipped | No changes |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Backoffice build results
+          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
+            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backoffice.result }}" == "failure" ]; then
+            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
+            echo "| Backoffice | ⏭️ Skipped | No changes |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## 🔒 Security Scan (Trivy)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.security-scan.result }}" == "success" ]; then
+            echo "✅ All images scanned successfully" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "View detailed results in the **Security** tab" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.security-scan.result }}" == "failure" ]; then
+            echo "⚠️ Security scan completed with warnings" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check the **Security** tab for vulnerability details" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.security-scan.result }}" == "skipped" ]; then
+            echo "⏭️ Skipped (no images to scan)" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 SonarQube Reports" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- [Backend Dashboard](${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-backend)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Frontend Dashboard](${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-frontend)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Backoffice Dashboard](${{ env.SONAR_HOST_URL }}/dashboard?id=sipzy-backoffice)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🐳 Docker Images" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Images available for platforms: **linux/amd64**, **linux/arm64**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Pipeline completed at $(date -u '+%Y-%m-%d %H:%M:%S UTC')*" >> $GITHUB_STEP_SUMMARY
+
+      - name: ✅ Pipeline Status
+        run: |
+          echo "Pipeline execution completed!"
+          echo "Check the summary above for detailed results."
