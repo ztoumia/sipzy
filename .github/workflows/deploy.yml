@@ -277,9 +277,9 @@ jobs:
           category: trivy-${{ matrix.service }}
         continue-on-error: true
 
-  # Deploy to VPS
-  deploy:
-    name: 🚀 Deploy to VPS
+  # Deploy to Staging
+  deploy-staging:
+    name: 🧪 Deploy to Staging
     runs-on: self-hosted
     needs: [build-images, security-scan]
     if: |
@@ -289,7 +289,58 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy services
+      - name: Deploy to staging environment
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          NEXT_PUBLIC_API_URL_STAGING: http://localhost:8081
+        run: |
+          docker-compose -f docker-compose.staging.yml down
+          docker-compose -f docker-compose.staging.yml up -d
+          sleep 10
+          docker-compose -f docker-compose.staging.yml ps
+
+      - name: Wait for staging services
+        run: |
+          echo "⏳ Waiting for services to be ready..."
+          sleep 30
+
+  # Run Smoke Tests on Staging
+  smoke-tests:
+    name: 🧪 Smoke Tests (Staging)
+    runs-on: self-hosted
+    needs: deploy-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        run: |
+          chmod +x scripts/smoke-tests.sh
+          ./scripts/smoke-tests.sh
+
+      - name: Test results
+        if: always()
+        run: |
+          echo "### 🧪 Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ $? -eq 0 ]; then
+            echo "✅ All tests passed on staging" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Tests failed on staging - deployment aborted" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Deploy to Production with Rolling Update
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: self-hosted
+    needs: [smoke-tests]
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rolling update deployment
         env:
           SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
           SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
@@ -297,16 +348,34 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
           NEXT_PUBLIC_API_URL: ${{ secrets.API_URL }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
-          docker-compose -f docker-compose.prod.yml down
-          docker-compose -f docker-compose.prod.yml up -d
-          docker-compose -f docker-compose.prod.yml ps
+          chmod +x scripts/rolling-update.sh
+          ./scripts/rolling-update.sh all
+
+      - name: Verify production deployment
+        run: |
+          echo "⏳ Verifying production services..."
+          sleep 5
+
+          # Check backend
+          curl -f http://localhost:8080/actuator/health || exit 1
+          # Check frontend
+          curl -f http://localhost:3000/ || exit 1
+          # Check backoffice
+          curl -f http://localhost:3001/ || exit 1
+
+          echo "✅ All production services are healthy"
 
       - name: Deployment summary
         run: |
-          echo "### 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Services deployed:**" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ✅ Successfully deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Services:**" >> $GITHUB_STEP_SUMMARY
           docker-compose -f docker-compose.prod.yml ps --format json | jq -r '.[] | "- \(.Service): \(.State)"' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Deployed at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment method:** Zero-downtime rolling update" >> $GITHUB_STEP_SUMMARY
