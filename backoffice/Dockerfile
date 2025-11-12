@@ -7,7 +7,7 @@ WORKDIR /workspace
 
 # Copy and install shared library dependencies
 COPY --from=shared package*.json ./shared/
-RUN cd shared && npm ci --only=production && npm cache clean --force
+RUN cd shared && npm ci && npm cache clean --force
 
 # Copy backoffice package files
 COPY package.json package-lock.json* ./backoffice/
