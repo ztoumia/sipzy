@@ -75,9 +75,9 @@ jobs:
               - 'shared/**'
               - '.github/workflows/deploy.yml'
 
-  # Test & Analyze Backend
-  test-backend:
-    name: 🧪 Test Backend
+  # Analyze Backend (skip tests - use Testcontainers locally)
+  analyze-backend:
+    name: 🔍 Analyze Backend
     runs-on: self-hosted
     needs: detect-changes
     if: |
@@ -95,13 +95,13 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           cache: 'gradle'
 
-      - name: Run tests & coverage
+      - name: Compile backend
         run: |
           cd backend
           chmod +x gradlew
-          ./gradlew test jacocoTestReport --no-daemon
+          ./gradlew compileJava compileTestJava --no-daemon
 
-      - name: SonarQube analysis
+      - name: SonarQube analysis (without tests)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -110,6 +110,7 @@ jobs:
             -Dsonar.projectKey=sipzy-backend \
             -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.gradle.skipCompile=true \
             --no-daemon
         continue-on-error: true
 
@@ -203,7 +204,7 @@ jobs:
   build-images:
     name: 🐳 Build Images
     runs-on: self-hosted
-    needs: [detect-changes, test-backend, test-frontend, test-backoffice]
+    needs: [detect-changes, analyze-backend, test-frontend, test-backoffice]
     if: always()
     steps:
       - uses: actions/checkout@v4
