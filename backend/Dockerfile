@@ -1,17 +1,12 @@
-# Multi-stage build for Spring Boot backend
-# Base image: eclipse-temurin:21-jdk-jammy (verified on Docker Hub)
+# Backend Dockerfile using pre-built base image
+# Base image: ztoumia/backend:latest (Java 21 + build tools)
 
-# Build stage
-FROM eclipse-temurin:21-jdk-jammy AS builder
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl git && \
-    rm -rf /var/lib/apt/lists/*
+FROM ztoumia/backend:latest AS builder
 
 WORKDIR /build
 
 # Cache dependencies
-COPY gradlew gradle/ build.gradle settings.gradle ./
+COPY gradlew build.gradle settings.gradle ./
 COPY gradle gradle/
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon || true
 

@@ -44,21 +44,30 @@ DOCKER_PASSWORD=<docker_hub_token>
 API_URL=<backend_api_url>
 ```
 
-## 4. Build des Images de Base (Optionnel - pour accélérer)
+## 4. Build des Images de Base (OBLIGATOIRE - une seule fois)
+
+Les Dockerfiles utilisent des images de base personnalisées pour accélérer les builds.
+Tu dois les créer une fois :
 
 ```bash
-# Backend base image
-docker build -t YOUR_USERNAME/sipzy-backend-base:latest \
-  -f docker/base/backend.Dockerfile .
-docker push YOUR_USERNAME/sipzy-backend-base:latest
+# 1. Login Docker Hub
+docker login
 
-# Frontend base image
-docker build -t YOUR_USERNAME/sipzy-frontend-base:latest \
-  -f docker/base/frontend.Dockerfile .
-docker push YOUR_USERNAME/sipzy-frontend-base:latest
+# 2. Build backend base image (Java 21 + outils)
+docker build -t ztoumia/backend:latest \
+  -f docker/base/backend.Dockerfile \
+  docker/base/
+docker push ztoumia/backend:latest
+
+# 3. Build frontend base image (Node 20 + outils)
+docker build -t ztoumia/frontend:latest \
+  -f docker/base/frontend.Dockerfile \
+  docker/base/
+docker push ztoumia/frontend:latest
 ```
 
-Puis modifier les Dockerfiles pour utiliser ces images de base au lieu de `eclipse-temurin` et `node`.
+**Important** : Ces images de base contiennent tous les outils de build pré-installés.
+Les builds GitHub Actions seront 2-3x plus rapides après cette étape.
 
 ## 5. Workflow Pipeline
 

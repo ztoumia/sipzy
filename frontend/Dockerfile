@@ -1,12 +1,7 @@
-# Multi-stage build for Next.js frontend
-# Base image: node:20-slim (verified on Docker Hub)
+# Frontend Dockerfile using pre-built base image
+# Base image: ztoumia/frontend:latest (Node 20 + build tools)
 
-# Dependencies
-FROM node:20-slim AS deps
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python3 make g++ && \
-    rm -rf /var/lib/apt/lists/*
+FROM ztoumia/frontend:latest AS deps
 
 WORKDIR /app
 
@@ -17,7 +12,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci && npm cache clean --force
 
 # Builder
-FROM node:20-slim AS builder
+FROM ztoumia/frontend:latest AS builder
 
 WORKDIR /app
 

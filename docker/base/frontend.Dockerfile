@@ -1,10 +1,9 @@
-# Base image for Sipzy Frontend/Backoffice builds
-# Build once, reuse for all Node.js builds
-# Includes: Node 20, build tools, common dependencies
+# Frontend base image - Build tools pre-installed
+# Tag: ztoumia/frontend:latest
+# Base: node:20-slim
 
 FROM node:20-slim
 
-# Install build tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         python3 \
@@ -14,7 +13,6 @@ RUN apt-get update && \
         ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Configure npm for faster builds
 RUN npm config set prefer-offline true && \
     npm config set audit false
 

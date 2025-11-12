@@ -1,10 +1,9 @@
-# Base image for Sipzy Backend builds
-# Build once, reuse for all backend builds
-# Includes: Java 21 JDK, Gradle, build tools
+# Backend base image - Build tools pre-installed
+# Tag: ztoumia/backend:latest
+# Base: eclipse-temurin:21-jdk-jammy
 
 FROM eclipse-temurin:21-jdk-jammy
 
-# Install build tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         curl \
@@ -12,8 +11,7 @@ RUN apt-get update && \
         unzip && \
     rm -rf /var/lib/apt/lists/*
 
-# Pre-install Gradle wrapper dependencies
-RUN mkdir -p /gradle-cache
 ENV GRADLE_USER_HOME=/gradle-cache
+RUN mkdir -p /gradle-cache
 
 WORKDIR /build
