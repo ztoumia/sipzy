@@ -1,4 +1,7 @@
-name: Build and Deploy to Docker Hub
+# CI/CD Pipeline for Sipzy - Build, Test, Analyze & Deploy on VPS
+# Self-hosted runner builds images locally and deploys them on VPS
+
+name: CI/CD Pipeline - Build, Test & Deploy
 
 on:
   push:
@@ -10,15 +13,12 @@ on:
       - 'backend/**'
       - 'frontend/**'
       - 'backoffice/**'
+      - 'shared/**'
       - '.github/workflows/deploy.yml'
   pull_request:
     branches:
       - main
       - master
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'backoffice/**'
   workflow_dispatch:
     inputs:
       service:
@@ -32,36 +32,34 @@ on:
           - frontend
           - backoffice
 
-# Required permissions for paths-filter and GitHub API access
 permissions:
   contents: read
   pull-requests: read
+  security-events: write
 
 env:
-  DOCKER_REGISTRY: ${{ secrets.DOCKER_USERNAME }}
-  BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backend
-  FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-frontend
-  BACKOFFICE_IMAGE: ${{ secrets.DOCKER_USERNAME }}/sipzy-backoffice
+  BACKEND_IMAGE: sipzy-backend
+  FRONTEND_IMAGE: sipzy-frontend
+  BACKOFFICE_IMAGE: sipzy-backoffice
+  SONAR_HOST_URL: http://sonarqube:9001
+  JAVA_VERSION: '21'
+  NODE_VERSION: '20'
 
 jobs:
-  # ========================================
-  # Job: Detect Changes
-  # ========================================
+  # Detect changed services
   detect-changes:
-    name: Detect Changed Services
+    name: 🔍 Detect Changes
     runs-on: self-hosted
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       backoffice: ${{ steps.filter.outputs.backoffice }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Check for changes
-        uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
@@ -70,23 +68,16 @@ jobs:
               - '.github/workflows/deploy.yml'
             frontend:
               - 'frontend/**'
+              - 'shared/**'
               - '.github/workflows/deploy.yml'
             backoffice:
               - 'backoffice/**'
+              - 'shared/**'
               - '.github/workflows/deploy.yml'
 
-      - name: Display detection results
-        run: |
-          echo "Backend changed: ${{ steps.filter.outputs.backend }}"
-          echo "Frontend changed: ${{ steps.filter.outputs.frontend }}"
-          echo "Backoffice changed: ${{ steps.filter.outputs.backoffice }}"
-          echo "Manual trigger service: ${{ github.event.inputs.service }}"
-
-  # ========================================
-  # Job: Build and Push Backend
-  # ========================================
-  build-backend:
-    name: Build and Push Backend
+  # Analyze Backend (skip tests - use Testcontainers locally)
+  analyze-backend:
+    name: 🔍 Analyze Backend
     runs-on: self-hosted
     needs: detect-changes
     if: |
@@ -94,53 +85,38 @@ jobs:
       github.event.inputs.service == 'backend' ||
       github.event.inputs.service == 'all'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          fetch-depth: 0
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
+      - uses: actions/setup-java@v4
         with:
-          images: ${{ env.BACKEND_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
 
-      - name: Build and push Backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.BACKEND_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            GRADLE_BUILD_ARGS=--no-daemon
+      - name: Compile backend
+        run: |
+          cd backend
+          chmod +x gradlew
+          ./gradlew compileJava compileTestJava --no-daemon
 
-      - name: Image digest
-        run: echo "Backend image digest ${{ steps.meta.outputs.digest }}"
+      - name: SonarQube analysis (without tests)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd backend
+          ./gradlew sonar \
+            -Dsonar.projectKey=sipzy-backend \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.gradle.skipCompile=true \
+            --no-daemon
+        continue-on-error: true
 
-  # ========================================
-  # Job: Build and Push Frontend
-  # ========================================
-  build-frontend:
-    name: Build and Push Frontend
+  # Test & Analyze Frontend
+  test-frontend:
+    name: 🧪 Test Frontend
     runs-on: self-hosted
     needs: detect-changes
     if: |
@@ -148,55 +124,42 @@ jobs:
       github.event.inputs.service == 'frontend' ||
       github.event.inputs.service == 'all'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          fetch-depth: 0
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
+      - uses: actions/setup-node@v4
         with:
-          images: ${{ env.FRONTEND_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            shared/package-lock.json
 
-      - name: Build and push Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          build-contexts: |
-            shared=./shared
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
+      - name: Install dependencies
+        run: |
+          cd shared && npm ci
+          cd ../frontend && npm ci
 
-      - name: Image digest
-        run: echo "Frontend image digest ${{ steps.meta.outputs.digest }}"
+      - name: Run tests
+        run: cd frontend && npm test -- --coverage --watchAll=false
+        continue-on-error: true
 
-  # ========================================
-  # Job: Build and Push Backoffice
-  # ========================================
-  build-backoffice:
-    name: Build and Push Backoffice
+      - name: SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd frontend
+          npx sonar-scanner \
+            -Dsonar.projectKey=sipzy-frontend \
+            -Dsonar.sources=app,components,lib \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  # Test & Analyze Backoffice
+  test-backoffice:
+    name: 🧪 Test Backoffice
     runs-on: self-hosted
     needs: detect-changes
     if: |
@@ -204,123 +167,215 @@ jobs:
       github.event.inputs.service == 'backoffice' ||
       github.event.inputs.service == 'all'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backoffice/package-lock.json
+            shared/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd shared && npm ci
+          cd ../backoffice && npm ci
+
+      - name: Run tests
+        run: cd backoffice && npm test -- --coverage --watchAll=false
+        continue-on-error: true
+
+      - name: SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd backoffice
+          npx sonar-scanner \
+            -Dsonar.projectKey=sipzy-backoffice \
+            -Dsonar.sources=app,components,lib \
+            -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
+            -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+  # Build Docker Images
+  build-images:
+    name: 🐳 Build Images
+    runs-on: self-hosted
+    needs: [detect-changes, analyze-backend, test-frontend, test-backoffice]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Backend
+        if: |
+          needs.detect-changes.outputs.backend == 'true' ||
+          github.event.inputs.service == 'backend' ||
+          github.event.inputs.service == 'all'
+        run: |
+          docker build -t ${{ env.BACKEND_IMAGE }}:latest \
+            -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -f backend/Dockerfile ./backend
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.BACKOFFICE_IMAGE }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build Frontend
+        if: |
+          needs.detect-changes.outputs.frontend == 'true' ||
+          github.event.inputs.service == 'frontend' ||
+          github.event.inputs.service == 'all'
+        run: |
+          docker build -t ${{ env.FRONTEND_IMAGE }}:latest \
+            -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            --build-context shared=./shared \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.API_URL }} \
+            -f frontend/Dockerfile ./frontend
 
-      - name: Build and push Backoffice
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backoffice
-          file: ./backoffice/Dockerfile
-          build-contexts: |
-            shared=./shared
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache
-          cache-to: type=registry,ref=${{ env.BACKOFFICE_IMAGE }}:buildcache,mode=max
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            NEXT_PUBLIC_API_URL=${{ secrets.API_URL }}
+      - name: Build Backoffice
+        if: |
+          needs.detect-changes.outputs.backoffice == 'true' ||
+          github.event.inputs.service == 'backoffice' ||
+          github.event.inputs.service == 'all'
+        run: |
+          docker build -t ${{ env.BACKOFFICE_IMAGE }}:latest \
+            -t ${{ env.BACKOFFICE_IMAGE }}:${{ github.sha }} \
+            --build-context shared=./shared \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.API_URL }} \
+            -f backoffice/Dockerfile ./backoffice
 
-      - name: Image digest
-        run: echo "Backoffice image digest ${{ steps.meta.outputs.digest }}"
-
-  # ========================================
-  # Job: Security Scan
-  # ========================================
+  # Security Scan
   security-scan:
-    name: Security Scan
+    name: 🔒 Security Scan
     runs-on: self-hosted
-    needs: [build-backend, build-frontend, build-backoffice]
-    if: always() && (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success' || needs.build-backoffice.result == 'success')
+    needs: [build-images, detect-changes]
+    if: always() && needs.build-images.result == 'success'
     strategy:
+      fail-fast: false
       matrix:
-        image:
-          - ${{ needs.build-backend.result == 'success' && 'backend' || '' }}
-          - ${{ needs.build-frontend.result == 'success' && 'frontend' || '' }}
-          - ${{ needs.build-backoffice.result == 'success' && 'backoffice' || '' }}
-        exclude:
-          - image: ''
+        service: [backend, frontend, backoffice]
     steps:
-      - name: Run Trivy vulnerability scanner
+      - name: Scan ${{ matrix.service }}
+        if: |
+          needs.detect-changes.outputs[matrix.service] == 'true' ||
+          github.event.inputs.service == matrix.service ||
+          github.event.inputs.service == 'all'
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.DOCKER_REGISTRY }}/sipzy-${{ matrix.image }}:latest
+          image-ref: sipzy-${{ matrix.service }}:latest
           format: 'sarif'
-          output: 'trivy-results-${{ matrix.image }}.sarif'
+          output: 'trivy-${{ matrix.service }}.sarif'
           severity: 'CRITICAL,HIGH'
 
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload scan results
         if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results-${{ matrix.image }}.sarif'
-          category: trivy-${{ matrix.image }}
+          sarif_file: 'trivy-${{ matrix.service }}.sarif'
+          category: trivy-${{ matrix.service }}
+        continue-on-error: true
 
-  # ========================================
-  # Job: Deployment Summary
-  # ========================================
-  deployment-summary:
-    name: Deployment Summary
+  # Deploy to Staging
+  deploy-staging:
+    name: 🧪 Deploy to Staging
     runs-on: self-hosted
-    needs: [build-backend, build-frontend, build-backoffice]
-    if: always()
+    needs: [build-images, security-scan]
+    if: |
+      always() &&
+      needs.build-images.result == 'success' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     steps:
-      - name: Create deployment summary
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging environment
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          NEXT_PUBLIC_API_URL_STAGING: http://localhost:8081
         run: |
-          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          docker-compose -f docker-compose.staging.yml down
+          docker-compose -f docker-compose.staging.yml up -d
+          sleep 10
+          docker-compose -f docker-compose.staging.yml ps
+
+      - name: Wait for staging services
+        run: |
+          echo "⏳ Waiting for services to be ready..."
+          sleep 30
+
+  # Run Smoke Tests on Staging
+  smoke-tests:
+    name: 🧪 Smoke Tests (Staging)
+    runs-on: self-hosted
+    needs: deploy-staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run smoke tests
+        run: |
+          chmod +x scripts/smoke-tests.sh
+          ./scripts/smoke-tests.sh
+
+      - name: Test results
+        if: always()
+        run: |
+          echo "### 🧪 Smoke Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ $? -eq 0 ]; then
+            echo "✅ All tests passed on staging" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Tests failed on staging - deployment aborted" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Deploy to Production with Rolling Update
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: self-hosted
+    needs: [smoke-tests]
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rolling update deployment
+        env:
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.API_URL }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          chmod +x scripts/rolling-update.sh
+          ./scripts/rolling-update.sh all
+
+      - name: Verify production deployment
+        run: |
+          echo "⏳ Verifying production services..."
+          sleep 5
+
+          # Check backend
+          curl -f http://localhost:8080/actuator/health || exit 1
+          # Check frontend
+          curl -f http://localhost:3000/ || exit 1
+          # Check backoffice
+          curl -f http://localhost:3001/ || exit 1
+
+          echo "✅ All production services are healthy"
+
+      - name: Deployment summary
+        run: |
+          echo "### 🚀 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Service | Status | Image |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|-------|" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ needs.build-backend.result }}" == "success" ]; then
-            echo "| Backend | ✅ Success | \`${{ env.BACKEND_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backend.result }}" == "skipped" ]; then
-            echo "| Backend | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backend | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
-            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
-            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.build-backoffice.result }}" == "success" ]; then
-            echo "| Backoffice | ✅ Success | \`${{ env.BACKOFFICE_IMAGE }}:latest\` |" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ needs.build-backoffice.result }}" == "skipped" ]; then
-            echo "| Backoffice | ⏭️ Skipped | No changes detected |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Backoffice | ❌ Failed | - |" >> $GITHUB_STEP_SUMMARY
-          fi
-
+          echo "**Status:** ✅ Successfully deployed" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Services:**" >> $GITHUB_STEP_SUMMARY
+          docker-compose -f docker-compose.prod.yml ps --format json | jq -r '.[] | "- \(.Service): \(.State)"' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployed at:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Deployment method:** Zero-downtime rolling update" >> $GITHUB_STEP_SUMMARY

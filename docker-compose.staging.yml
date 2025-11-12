@@ -1,0 +1,105 @@
+# Staging Environment - Docker Compose
+# Tests before production deployment
+
+version: '3.8'
+
+services:
+  # PostgreSQL Staging Database
+  db-staging:
+    image: postgres:15-alpine
+    container_name: sipzy-db-staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sipzy_staging}
+      POSTGRES_USER: ${POSTGRES_USER:-sipzy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sipzy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sipzy_staging_network
+
+  # Backend Staging
+  backend-staging:
+    image: sipzy-backend:latest
+    container_name: sipzy-backend-staging
+    restart: unless-stopped
+    depends_on:
+      db-staging:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-staging:5432/${POSTGRES_DB:-sipzy_staging}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-sipzy}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      CLOUDINARY_URL: ${CLOUDINARY_URL}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS_STAGING:-http://localhost:3100,http://localhost:3101}
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - sipzy_staging_network
+
+  # Frontend Staging
+  frontend-staging:
+    image: sipzy-frontend:latest
+    container_name: sipzy-frontend-staging
+    restart: unless-stopped
+    depends_on:
+      backend-staging:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL_STAGING:-http://localhost:8081}
+      NODE_ENV: production
+    ports:
+      - "3100:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sipzy_staging_network
+
+  # Backoffice Staging
+  backoffice-staging:
+    image: sipzy-backoffice:latest
+    container_name: sipzy-backoffice-staging
+    restart: unless-stopped
+    depends_on:
+      backend-staging:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL_STAGING:-http://localhost:8081}
+      NODE_ENV: production
+    ports:
+      - "3101:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sipzy_staging_network
+
+volumes:
+  postgres_staging_data:
+    name: sipzy_postgres_staging_data
+
+networks:
+  sipzy_staging_network:
+    name: sipzy_staging_network
+    driver: bridge
