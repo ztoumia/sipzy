@@ -120,7 +120,7 @@ function CoffeesPageContent() {
                     placeholder="Rechercher un café, torréfacteur, origine..."
                     className="pl-10"
                     value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value)}
                   />
                 </div>
               </form>
