@@ -281,14 +281,21 @@ CREATE TABLE note_icons (
 ### Nouveau format `coffees.csv`
 
 ```csv
-name,roaster_name,origin,process,variety,altitude_min,altitude_max,harvest_year,price,weight,description,image_url,notes
-Ethiopia Yirgacheffe,Café Lomi,Ethiopia,Washed,Heirloom,1800,2200,2024,18.50,250,"Un café éthiopien aux notes florales...",,Citrus;Floral;Berry
+name,roaster_name,origin,process,variety,altitude_min,altitude_max,harvest_year,price,weight,description,image_url,notes,aromatic_profile,organic_certification,mouture,producer,espece
+Café BIO Honduras Ceiba,Café Coutume,"Honduras, La Paz",Honey,"Parainema, Catuai rouge",1200,1700,2024,17.90,250,"Un café gourmand...",,Chocolat au Lait;Vanille,Sucré,yes,"Grains;Espresso",,Arabica
 ```
 
-**Nouveaux champs :**
-- `price` : Prix en euros (DECIMAL)
-- `weight` : Poids en grammes (INTEGER)
-- ~~`price_range`~~ : Supprimé (calculé automatiquement)
+**Champs pour le calcul de prix automatique :**
+- `price` : Prix en euros (DECIMAL) - pour calcul du price_range
+- `weight` : Poids en grammes (INTEGER) - pour calcul du prix au kilo
+- ~~`price_range`~~ : Supprimé du CSV (calculé automatiquement par le backend)
+
+**Champs supplémentaires pour enrichissement :**
+- `aromatic_profile` : Profil aromatique global (ex: "Fruité", "Sucré", "Épicé")
+- `organic_certification` : Certification bio (yes/no)
+- `mouture` : Types de mouture disponibles, séparés par ";" (ex: "Grains;Espresso;Filtre")
+- `producer` : Nom du producteur ou de la coopérative
+- `espece` : Espèce du café (Arabica, Robusta, etc.)
 
 ### Nouveau fichier `notes.csv` enrichi
 
@@ -358,18 +365,26 @@ public class Image {
 ```java
 @Entity
 public class Coffee {
-    // Nouveaux champs
+    // Nouveaux champs pour calcul automatique du prix
     private BigDecimal price;
     private Integer weight;
 
     @Formula("(price / weight) * 1000")
     private BigDecimal pricePerKg;
 
+    // Nouvelle gestion des images
     @ManyToOne
     @JoinColumn(name = "image_id")
     private Image image;
 
-    // Garder priceRange pour compatibilité
+    // Champs supplémentaires pour enrichissement
+    private String aromaticProfile;      // Profil aromatique global
+    private Boolean organicCertification; // Certification bio
+    private String mouture;               // Types de mouture (séparés par ;)
+    private String producer;              // Nom du producteur
+    private String espece;                // Espèce (Arabica, Robusta)
+
+    // Garder priceRange pour compatibilité (devient calculé)
     private String priceRange;
 }
 ```
@@ -401,15 +416,26 @@ public class Note {
 
 ```typescript
 export interface Coffee {
-  // Nouveaux champs
+  // Nouveaux champs pour calcul automatique
   price?: number;
   weight?: number;
   pricePerKg?: number;
-  image?: Image;
 
-  // Garder pour compatibilité
-  imageUrl?: string;
-  priceRange?: string;
+  // Nouvelle gestion des images
+  image?: Image;
+  imageUrl?: string; // Déprécié, utiliser image
+
+  // Champs supplémentaires pour enrichissement
+  aromaticProfile?: string;      // Profil aromatique global
+  organicCertification?: boolean; // Certification bio
+  mouture?: string;               // Types de mouture (séparés par ;)
+  producer?: string;              // Nom du producteur
+  espece?: string;                // Espèce (Arabica, Robusta)
+
+  // Champs calculés
+  priceRange?: string; // Calculé automatiquement par le backend
+
+  // Autres champs existants inchangés...
 }
 
 export interface Image {
