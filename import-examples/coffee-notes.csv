@@ -1,31 +1,104 @@
 name,category
 Agrumes,Fruité
+Citron,Fruité
+Orange,Fruité
+Pamplemousse,Fruité
+Mandarine,Fruité
+Lime,Fruité
 Baies,Fruité
+Framboise,Fruité
+Fraise,Fruité
+Myrtille,Fruité
+Mûre,Fruité
+Cassis,Fruité
+Cerise,Fruité
 Fruits à Noyau,Fruité
+Pêche,Fruité
+Abricot,Fruité
+Prune,Fruité
 Fruits Tropicaux,Fruité
+Mangue,Fruité
+Ananas,Fruité
+Fruit de la Passion,Fruité
+Papaye,Fruité
+Noix de Coco,Fruité
 Pomme,Fruité
+Poire,Fruité
 Raisin,Fruité
+Figue,Fruité
+Datte,Fruité
 Floral,Floral
 Jasmin,Floral
 Rose,Floral
 Lavande,Floral
 Camomille,Floral
+Hibiscus,Floral
+Fleur d'Oranger,Floral
+Bergamote,Floral
 Chocolat,Chocolaté
 Chocolat Noir,Chocolaté
 Cacao,Chocolaté
 Chocolat au Lait,Chocolaté
+Cacao Torréfié,Chocolaté
+Praliné Chocolaté,Chocolaté
 Noisette,Fruits à Coque
 Amande,Fruits à Coque
 Noisette Grillée,Fruits à Coque
 Cacahuète,Fruits à Coque
+Noix,Fruits à Coque
+Noix de Pécan,Fruits à Coque
+Pistache,Fruits à Coque
+Noix de Macadamia,Fruits à Coque
 Caramel,Sucré
 Miel,Sucré
 Cassonade,Sucré
 Sirop d'Érable,Sucré
 Vanille,Sucré
-Terreux,Terreux
-Boisé,Terreux
-Tabac,Terreux
+Mélasse,Sucré
+Sucre Brun,Sucré
+Praliné,Sucré
+Toffee,Sucré
+Pain d'Épices,Sucré
 Épicé,Épicé
 Cannelle,Épicé
 Poivre,Épicé
+Clou de Girofle,Épicé
+Cardamome,Épicé
+Gingembre,Épicé
+Muscade,Épicé
+Anis,Épicé
+Coriandre,Épicé
+Terreux,Terreux
+Boisé,Terreux
+Tabac,Terreux
+Cuir,Terreux
+Champignon,Terreux
+Sous-Bois,Terreux
+Écorce,Terreux
+Herbacé,Herbacé
+Herbe Fraîche,Herbacé
+Thé Vert,Herbacé
+Thé Noir,Herbacé
+Foin,Herbacé
+Menthe,Herbacé
+Basilic,Herbacé
+Eucalyptus,Herbacé
+Crémeux,Crémeux
+Beurre,Crémeux
+Crème,Crémeux
+Lait,Crémeux
+Yaourt,Crémeux
+Fromage,Crémeux
+Torréfié,Torréfié
+Pain Grillé,Torréfié
+Grillé,Torréfié
+Fumé,Torréfié
+Café Torréfié,Torréfié
+Brûlé,Torréfié
+Cendre,Torréfié
+Vineux,Fermenté
+Fermenté,Fermenté
+Vin Rouge,Fermenté
+Rhum,Fermenté
+Whisky,Fermenté
+Cognac,Fermenté

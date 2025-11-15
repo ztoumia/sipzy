@@ -8,11 +8,88 @@
       "icon": "agrumes.svg"
     },
     {
+      "slug": "citron",
+      "name": "Citron",
+      "category": "Fruité",
+      "description": "Arôme acidulé et rafraîchissant de citron frais, apportant une vivacité citronnée marquée. Cette note est caractéristique des cafés d'altitude avec une acidité vive.",
+      "icon": "citron.svg"
+    },
+    {
+      "slug": "orange",
+      "name": "Orange",
+      "category": "Fruité",
+      "description": "Notes douces et juteuses d'orange, combinant acidité et sucrosité. Ces arômes ajoutent une dimension fruitée ensoleillée et équilibrée au café.",
+      "icon": "orange.svg"
+    },
+    {
+      "slug": "pamplemousse",
+      "name": "Pamplemousse",
+      "category": "Fruité",
+      "description": "Saveur acidulée et légèrement amère de pamplemousse, apportant une fraîcheur intense. Note appréciée dans les cafés kenyans et éthiopiens de haute qualité.",
+      "icon": "pamplemousse.svg"
+    },
+    {
+      "slug": "mandarine",
+      "name": "Mandarine",
+      "category": "Fruité",
+      "description": "Arôme doux et délicat de mandarine, plus sucré que les autres agrumes. Cette note apporte une touche fruitée raffinée et accessible.",
+      "icon": "mandarine.svg"
+    },
+    {
+      "slug": "lime",
+      "name": "Lime",
+      "category": "Fruité",
+      "description": "Notes vives et piquantes de lime, apportant une acidité intense et rafraîchissante. Cet arôme est souvent présent dans les cafés lavés d'excellente qualité.",
+      "icon": "lime.svg"
+    },
+    {
       "slug": "baies",
       "name": "Baies",
       "category": "Fruité",
       "description": "Arômes de baies rouges et noires comme la framboise, la myrtille, la mûre ou la fraise. Ces notes fruitées ajoutent une douceur délicate et complexe.",
       "icon": "baies.svg"
+    },
+    {
+      "slug": "framboise",
+      "name": "Framboise",
+      "category": "Fruité",
+      "description": "Saveur délicate et acidulée de framboise fraîche, apportant une complexité fruitée raffinée. Cette note est très recherchée dans les cafés naturels éthiopiens.",
+      "icon": "framboise.svg"
+    },
+    {
+      "slug": "fraise",
+      "name": "Fraise",
+      "category": "Fruité",
+      "description": "Arôme doux et sucré de fraise mûre, offrant une gourmandise fruitée accessible. Ces notes sont caractéristiques de certains cafés nature de spécialité.",
+      "icon": "fraise.svg"
+    },
+    {
+      "slug": "myrtille",
+      "name": "Myrtille",
+      "category": "Fruité",
+      "description": "Notes de myrtille fraîche avec une légère acidité et une douceur subtile. Cet arôme complexe est apprécié dans les cafés lavés d'altitude.",
+      "icon": "myrtille.svg"
+    },
+    {
+      "slug": "mure",
+      "name": "Mûre",
+      "category": "Fruité",
+      "description": "Saveur profonde et juteuse de mûre sauvage, combinant douceur et légère astringence. Cette note ajoute une richesse fruitée intense et complexe.",
+      "icon": "mure.svg"
+    },
+    {
+      "slug": "cassis",
+      "name": "Cassis",
+      "category": "Fruité",
+      "description": "Arôme intense et légèrement acidulé de cassis, apportant une dimension fruitée noire prononcée. Note caractéristique des cafés kenyans de haute qualité.",
+      "icon": "cassis.svg"
+    },
+    {
+      "slug": "cerise",
+      "name": "Cerise",
+      "category": "Fruité",
+      "description": "Notes de cerise fraîche ou compotée, offrant une douceur fruitée avec une pointe d'acidité. Très présent dans les cafés nature d'Amérique centrale.",
+      "icon": "cerise.svg"
     },
     {
       "slug": "fruits-a-noyau",
@@ -22,11 +99,67 @@
       "icon": "fruits-a-noyau.svg"
     },
     {
+      "slug": "peche",
+      "name": "Pêche",
+      "category": "Fruité",
+      "description": "Arôme doux et velouté de pêche mûre, apportant une sucrosité délicate et juteuse. Cette note ajoute une rondeur fruitée très appréciée.",
+      "icon": "peche.svg"
+    },
+    {
+      "slug": "abricot",
+      "name": "Abricot",
+      "category": "Fruité",
+      "description": "Saveur sucrée et légèrement acidulée d'abricot, offrant une complexité fruitée raffinée. Souvent présent dans les cafés lavés d'Amérique centrale.",
+      "icon": "abricot.svg"
+    },
+    {
+      "slug": "prune",
+      "name": "Prune",
+      "category": "Fruité",
+      "description": "Notes riches de prune fraîche ou séchée, apportant une douceur profonde avec une légère acidité. Caractéristique des cafés nature et semi-lavés.",
+      "icon": "prune.svg"
+    },
+    {
       "slug": "fruits-tropicaux",
       "name": "Fruits Tropicaux",
       "category": "Fruité",
       "description": "Notes exotiques évoquant la mangue, l'ananas, la papaye, le fruit de la passion ou la banane. Ces arômes apportent une dimension tropicale et ensoleillée.",
       "icon": "fruits-tropicaux.svg"
+    },
+    {
+      "slug": "mangue",
+      "name": "Mangue",
+      "category": "Fruité",
+      "description": "Arôme exotique et juteux de mangue mûre, apportant une sucrosité tropicale intense. Cette note est caractéristique des cafés naturels africains.",
+      "icon": "mangue.svg"
+    },
+    {
+      "slug": "ananas",
+      "name": "Ananas",
+      "category": "Fruité",
+      "description": "Saveur acidulée et sucrée d'ananas frais, offrant une vivacité tropicale rafraîchissante. Note recherchée dans les cafés lavés fermentés de spécialité.",
+      "icon": "ananas.svg"
+    },
+    {
+      "slug": "fruit-de-la-passion",
+      "name": "Fruit de la Passion",
+      "category": "Fruité",
+      "description": "Notes intenses et acidulées de fruit de la passion, apportant une complexité tropicale unique. Très apprécié dans les cafés expérimentaux et fermentés.",
+      "icon": "fruit-de-la-passion.svg"
+    },
+    {
+      "slug": "papaye",
+      "name": "Papaye",
+      "category": "Fruité",
+      "description": "Arôme doux et crémeux de papaye mûre, offrant une sucrosité tropicale délicate. Cette note ajoute une dimension exotique subtile et raffinée.",
+      "icon": "papaye.svg"
+    },
+    {
+      "slug": "noix-de-coco",
+      "name": "Noix de Coco",
+      "category": "Fruité",
+      "description": "Saveur crémeuse et sucrée de noix de coco, apportant une richesse tropicale onctueuse. Note rare mais très appréciée dans certains cafés nature.",
+      "icon": "noix-de-coco.svg"
     },
     {
       "slug": "pomme",
@@ -36,11 +169,32 @@
       "icon": "pomme.svg"
     },
     {
+      "slug": "poire",
+      "name": "Poire",
+      "category": "Fruité",
+      "description": "Notes délicates de poire juteuse, offrant une douceur fruitée subtile et raffinée. Cette note ajoute une élégance discrète au profil aromatique.",
+      "icon": "poire.svg"
+    },
+    {
       "slug": "raisin",
       "name": "Raisin",
       "category": "Fruité",
       "description": "Saveurs rappelant le raisin frais ou le jus de raisin, parfois avec des notes de vin. Ces arômes ajoutent une complexité fruitée et légèrement vinifiée.",
       "icon": "raisin.svg"
+    },
+    {
+      "slug": "figue",
+      "name": "Figue",
+      "category": "Fruité",
+      "description": "Arôme riche et sucré de figue fraîche ou séchée, apportant une complexité fruitée profonde. Note caractéristique des cafés nature vieillis.",
+      "icon": "figue.svg"
+    },
+    {
+      "slug": "datte",
+      "name": "Datte",
+      "category": "Fruité",
+      "description": "Saveur intensément sucrée de datte, offrant une richesse fruitée caramélisée. Cette note est souvent présente dans les cafés nature à torréfaction moyenne.",
+      "icon": "datte.svg"
     },
     {
       "slug": "floral",
@@ -78,6 +232,27 @@
       "icon": "camomille.svg"
     },
     {
+      "slug": "hibiscus",
+      "name": "Hibiscus",
+      "category": "Floral",
+      "description": "Arôme floral acidulé d'hibiscus, apportant une vivacité florale unique et rafraîchissante. Note caractéristique de certains cafés africains fermentés.",
+      "icon": "hibiscus.svg"
+    },
+    {
+      "slug": "fleur-oranger",
+      "name": "Fleur d'Oranger",
+      "category": "Floral",
+      "description": "Parfum délicat et suave de fleur d'oranger, offrant une douceur florale raffinée. Cette note ajoute une élégance méditerranéenne subtile.",
+      "icon": "fleur-oranger.svg"
+    },
+    {
+      "slug": "bergamote",
+      "name": "Bergamote",
+      "category": "Floral",
+      "description": "Notes florales et citronnées de bergamote, rappelant le thé Earl Grey. Cet arôme complexe combine fraîcheur et élégance florale.",
+      "icon": "bergamote.svg"
+    },
+    {
       "slug": "chocolat",
       "name": "Chocolat",
       "category": "Chocolaté",
@@ -106,6 +281,20 @@
       "icon": "chocolat-au-lait.svg"
     },
     {
+      "slug": "cacao-torrefi",
+      "name": "Cacao Torréfié",
+      "category": "Chocolaté",
+      "description": "Notes de fèves de cacao grillées, apportant une amertume noble et une richesse profonde. Caractéristique des torréfactions moyennes à foncées.",
+      "icon": "cacao-torrefi.svg"
+    },
+    {
+      "slug": "praline-chocolat",
+      "name": "Praliné Chocolaté",
+      "category": "Chocolaté",
+      "description": "Arôme gourmand de praliné au chocolat, combinant fruits à coque et chocolat. Cette note ajoute une dimension confiserie raffinée.",
+      "icon": "praline-chocolat.svg"
+    },
+    {
       "slug": "noisette",
       "name": "Noisette",
       "category": "Fruits à Coque",
@@ -132,6 +321,34 @@
       "category": "Fruits à Coque",
       "description": "Notes de cacahuète grillée, apportant une dimension terreuse et légèrement salée. Moins raffiné mais très caractéristique.",
       "icon": "cacahuete.svg"
+    },
+    {
+      "slug": "noix",
+      "name": "Noix",
+      "category": "Fruits à Coque",
+      "description": "Arôme riche de noix fraîche ou grillée, apportant une complexité beurrée et légèrement amère. Ces notes ajoutent de la profondeur.",
+      "icon": "noix.svg"
+    },
+    {
+      "slug": "pecan",
+      "name": "Noix de Pécan",
+      "category": "Fruits à Coque",
+      "description": "Saveur douce et beurrée de noix de pécan, offrant une richesse délicate. Cette note ajoute une touche d'élégance américaine.",
+      "icon": "pecan.svg"
+    },
+    {
+      "slug": "pistache",
+      "name": "Pistache",
+      "category": "Fruits à Coque",
+      "description": "Notes subtiles de pistache grillée, apportant une douceur végétale unique. Arôme rare mais très apprécié dans les cafés de spécialité.",
+      "icon": "pistache.svg"
+    },
+    {
+      "slug": "macadamia",
+      "name": "Noix de Macadamia",
+      "category": "Fruits à Coque",
+      "description": "Arôme crémeux et beurré de noix de macadamia, offrant une richesse onctueuse exceptionnelle. Note de luxe très recherchée.",
+      "icon": "macadamia.svg"
     },
     {
       "slug": "caramel",
@@ -169,25 +386,39 @@
       "icon": "vanille.svg"
     },
     {
-      "slug": "terreux",
-      "name": "Terreux",
-      "category": "Terreux",
-      "description": "Notes terreuses générales évoquant le sol humide, la mousse ou le sous-bois. Ces arômes apportent profondeur et caractère rustique.",
-      "icon": "terreux.svg"
+      "slug": "melasse",
+      "name": "Mélasse",
+      "category": "Sucré",
+      "description": "Saveur profonde et riche de mélasse, apportant une sucrosité intense et complexe. Note caractéristique des cafés nature à torréfaction moyenne.",
+      "icon": "melasse.svg"
     },
     {
-      "slug": "boise",
-      "name": "Boisé",
-      "category": "Terreux",
-      "description": "Arômes de bois, de cèdre ou de chêne, apportant une dimension forestière. Ces notes ajoutent de la structure et de la complexité.",
-      "icon": "boise.svg"
+      "slug": "sucre-brun",
+      "name": "Sucre Brun",
+      "category": "Sucré",
+      "description": "Arôme doux de sucre brun non raffiné, offrant une complexité sucrée naturelle. Ces notes ajoutent une profondeur gourmande rustique.",
+      "icon": "sucre-brun.svg"
     },
     {
-      "slug": "tabac",
-      "name": "Tabac",
-      "category": "Terreux",
-      "description": "Saveur de tabac séché, souvent présente dans les cafés vieillis ou très torréfiés. Note complexe appréciée des connaisseurs.",
-      "icon": "tabac.svg"
+      "slug": "praline",
+      "name": "Praliné",
+      "category": "Sucré",
+      "description": "Notes gourmandes de praliné aux amandes ou noisettes, combinant sucrosité et fruits à coque. Arôme confiserie très apprécié.",
+      "icon": "praline.svg"
+    },
+    {
+      "slug": "toffee",
+      "name": "Toffee",
+      "category": "Sucré",
+      "description": "Saveur riche de toffee anglais, apportant une sucrosité beurrée et caramélisée. Cette note ajoute une dimension confiserie raffinée.",
+      "icon": "toffee.svg"
+    },
+    {
+      "slug": "pain-epices",
+      "name": "Pain d'Épices",
+      "category": "Sucré",
+      "description": "Arôme complexe de pain d'épices, combinant miel, épices douces et notes sucrées. Très réconfortant et apprécié en période hivernale.",
+      "icon": "pain-epices.svg"
     },
     {
       "slug": "epice",
@@ -209,6 +440,286 @@
       "category": "Épicé",
       "description": "Notes poivrées légèrement piquantes, ajoutant une vivacité épicée. Ces arômes sont caractéristiques de certains cafés africains.",
       "icon": "poivre.svg"
+    },
+    {
+      "slug": "clou-de-girofle",
+      "name": "Clou de Girofle",
+      "category": "Épicé",
+      "description": "Arôme puissant et aromatique de clou de girofle, apportant une chaleur épicée intense. Note complexe appréciée des connaisseurs.",
+      "icon": "clou-de-girofle.svg"
+    },
+    {
+      "slug": "cardamome",
+      "name": "Cardamome",
+      "category": "Épicé",
+      "description": "Notes fraîches et citronnées de cardamome, offrant une dimension épicée raffinée. Arôme caractéristique des cafés orientaux et éthiopiens.",
+      "icon": "cardamome.svg"
+    },
+    {
+      "slug": "gingembre",
+      "name": "Gingembre",
+      "category": "Épicé",
+      "description": "Saveur vive et piquante de gingembre frais, apportant une chaleur épicée dynamique. Cette note ajoute de la vivacité et de la complexité.",
+      "icon": "gingembre.svg"
+    },
+    {
+      "slug": "muscade",
+      "name": "Muscade",
+      "category": "Épicé",
+      "description": "Arôme chaud et doux de noix de muscade, offrant une dimension épicée réconfortante. Note subtile qui ajoute de la profondeur.",
+      "icon": "muscade.svg"
+    },
+    {
+      "slug": "anis",
+      "name": "Anis",
+      "category": "Épicé",
+      "description": "Notes anisées légèrement sucrées, rappelant la réglisse et le fenouil. Arôme distinctif qui apporte une touche méditerranéenne.",
+      "icon": "anis.svg"
+    },
+    {
+      "slug": "coriandre",
+      "name": "Coriandre",
+      "category": "Épicé",
+      "description": "Saveur épicée et légèrement citronnée de coriandre, offrant une fraîcheur aromatique unique. Note rare mais intéressante.",
+      "icon": "coriandre.svg"
+    },
+    {
+      "slug": "terreux",
+      "name": "Terreux",
+      "category": "Terreux",
+      "description": "Notes terreuses générales évoquant le sol humide, la mousse ou le sous-bois. Ces arômes apportent profondeur et caractère rustique.",
+      "icon": "terreux.svg"
+    },
+    {
+      "slug": "boise",
+      "name": "Boisé",
+      "category": "Terreux",
+      "description": "Arômes de bois, de cèdre ou de chêne, apportant une dimension forestière. Ces notes ajoutent de la structure et de la complexité.",
+      "icon": "boise.svg"
+    },
+    {
+      "slug": "tabac",
+      "name": "Tabac",
+      "category": "Terreux",
+      "description": "Saveur de tabac séché, souvent présente dans les cafés vieillis ou très torréfiés. Note complexe appréciée des connaisseurs.",
+      "icon": "tabac.svg"
+    },
+    {
+      "slug": "cuir",
+      "name": "Cuir",
+      "category": "Terreux",
+      "description": "Notes de cuir tanné, apportant une dimension riche et profonde. Arôme complexe caractéristique des cafés vieillis ou à torréfaction foncée.",
+      "icon": "cuir.svg"
+    },
+    {
+      "slug": "champignon",
+      "name": "Champignon",
+      "category": "Terreux",
+      "description": "Arôme subtil de champignon forestier, offrant une note umami terreuse. Cette note ajoute une complexité unique appréciée des experts.",
+      "icon": "champignon.svg"
+    },
+    {
+      "slug": "sous-bois",
+      "name": "Sous-Bois",
+      "category": "Terreux",
+      "description": "Saveur évoquant la forêt humide et les feuilles mortes, apportant une richesse terreuse naturelle. Note caractéristique des cafés indonésiens.",
+      "icon": "sous-bois.svg"
+    },
+    {
+      "slug": "ecorce",
+      "name": "Écorce",
+      "category": "Terreux",
+      "description": "Notes d'écorce d'arbre, offrant une dimension végétale sèche et tannique. Arôme qui ajoute de la structure et de la complexité.",
+      "icon": "ecorce.svg"
+    },
+    {
+      "slug": "herbace",
+      "name": "Herbacé",
+      "category": "Herbacé",
+      "description": "Notes générales d'herbes fraîches ou séchées, apportant une dimension végétale. Ces arômes ajoutent de la fraîcheur et de la vivacité.",
+      "icon": "herbace.svg"
+    },
+    {
+      "slug": "herbe-fraiche",
+      "name": "Herbe Fraîche",
+      "category": "Herbacé",
+      "description": "Arôme d'herbe fraîchement coupée, offrant une fraîcheur végétale intense. Note caractéristique des cafés verts ou sous-développés.",
+      "icon": "herbe-fraiche.svg"
+    },
+    {
+      "slug": "the-vert",
+      "name": "Thé Vert",
+      "category": "Herbacé",
+      "description": "Notes délicates de thé vert, apportant une astringence végétale raffinée. Arôme apprécié dans les cafés lavés d'altitude avec torréfaction claire.",
+      "icon": "the-vert.svg"
+    },
+    {
+      "slug": "the-noir",
+      "name": "Thé Noir",
+      "category": "Herbacé",
+      "description": "Saveur tannique de thé noir, offrant une complexité végétale oxydée. Cette note ajoute une profondeur et une astringence nobles.",
+      "icon": "the-noir.svg"
+    },
+    {
+      "slug": "foin",
+      "name": "Foin",
+      "category": "Herbacé",
+      "description": "Arôme de foin séché, apportant une note végétale douce et réconfortante. Caractéristique de certains cafés nature à torréfaction légère.",
+      "icon": "foin.svg"
+    },
+    {
+      "slug": "menthe",
+      "name": "Menthe",
+      "category": "Herbacé",
+      "description": "Notes rafraîchissantes de menthe, offrant une fraîcheur herbacée vive. Arôme distinctif qui apporte de la vivacité et de la complexité.",
+      "icon": "menthe.svg"
+    },
+    {
+      "slug": "basilic",
+      "name": "Basilic",
+      "category": "Herbacé",
+      "description": "Saveur aromatique de basilic frais, apportant une dimension herbacée méditerranéenne. Note rare mais intéressante dans certains cafés expérimentaux.",
+      "icon": "basilic.svg"
+    },
+    {
+      "slug": "eucalyptus",
+      "name": "Eucalyptus",
+      "category": "Herbacé",
+      "description": "Arôme mentholé et camphreux d'eucalyptus, offrant une fraîcheur intense et distinctive. Note particulière appréciée des amateurs de profils complexes.",
+      "icon": "eucalyptus.svg"
+    },
+    {
+      "slug": "cremeux",
+      "name": "Crémeux",
+      "category": "Crémeux",
+      "description": "Texture et arôme généraux de crème, apportant une onctuosité ronde et veloutée. Ces notes ajoutent du corps et de la douceur.",
+      "icon": "cremeux.svg"
+    },
+    {
+      "slug": "beurre",
+      "name": "Beurre",
+      "category": "Crémeux",
+      "description": "Notes beurrées riches et onctueuses, offrant une texture crémeuse en bouche. Arôme caractéristique des cafés bien équilibrés avec bon corps.",
+      "icon": "beurre.svg"
+    },
+    {
+      "slug": "creme",
+      "name": "Crème",
+      "category": "Crémeux",
+      "description": "Saveur douce et veloutée de crème fraîche, apportant une rondeur lactée délicate. Cette note ajoute de la douceur et du corps.",
+      "icon": "creme.svg"
+    },
+    {
+      "slug": "lait",
+      "name": "Lait",
+      "category": "Crémeux",
+      "description": "Arôme lacté doux rappelant le lait frais, offrant une onctuosité légère. Note qui adoucit et équilibre les profils plus vifs.",
+      "icon": "lait.svg"
+    },
+    {
+      "slug": "yaourt",
+      "name": "Yaourt",
+      "category": "Crémeux",
+      "description": "Notes lactiques légèrement acidulées de yaourt, apportant une dimension crémeuse fermentée. Caractéristique de certains cafés avec fermentation contrôlée.",
+      "icon": "yaourt.svg"
+    },
+    {
+      "slug": "fromage",
+      "name": "Fromage",
+      "category": "Crémeux",
+      "description": "Arôme lacté fermenté évoquant certains fromages doux, offrant une complexité crémeuse unique. Note rare mais présente dans cafés anaérobiques.",
+      "icon": "fromage.svg"
+    },
+    {
+      "slug": "torrefi",
+      "name": "Torréfié",
+      "category": "Torréfié",
+      "description": "Notes générales de torréfaction, évoquant les arômes développés par la cuisson des grains. Ces notes apportent profondeur et caractère.",
+      "icon": "torrefi.svg"
+    },
+    {
+      "slug": "pain-grille",
+      "name": "Pain Grillé",
+      "category": "Torréfié",
+      "description": "Arôme réconfortant de pain grillé ou toasté, apportant une dimension céréalière rôtie. Note très appréciée dans les cafés équilibrés.",
+      "icon": "pain-grille.svg"
+    },
+    {
+      "slug": "grille",
+      "name": "Grillé",
+      "category": "Torréfié",
+      "description": "Saveur générale de grillé, évoquant les notes caramélisées de la torréfaction. Ces arômes ajoutent de la profondeur et du caractère.",
+      "icon": "grille.svg"
+    },
+    {
+      "slug": "fume",
+      "name": "Fumé",
+      "category": "Torréfié",
+      "description": "Notes fumées rappelant le bois brûlé ou la fumée de cheminée, apportant une dimension intense. Caractéristique des torréfactions moyennes à foncées.",
+      "icon": "fume.svg"
+    },
+    {
+      "slug": "cafe-torrefi",
+      "name": "Café Torréfié",
+      "category": "Torréfié",
+      "description": "Arôme typique de café fraîchement torréfié, concentrant les notes de cuisson caractéristiques. Note fondamentale du profil du café.",
+      "icon": "cafe-torrefi.svg"
+    },
+    {
+      "slug": "brule",
+      "name": "Brûlé",
+      "category": "Torréfié",
+      "description": "Notes de caramélisation intense ou légèrement carbonisée, résultant d'une torréfaction poussée. Peut être agréable en petite quantité.",
+      "icon": "brule.svg"
+    },
+    {
+      "slug": "cendre",
+      "name": "Cendre",
+      "category": "Torréfié",
+      "description": "Arôme minéral de cendre de bois, apportant une dimension sèche et intense. Caractéristique des cafés à torréfaction très foncée.",
+      "icon": "cendre.svg"
+    },
+    {
+      "slug": "vineux",
+      "name": "Vineux",
+      "category": "Fermenté",
+      "description": "Notes rappelant le vin rouge, avec une acidité fruitée fermentée complexe. Arôme recherché dans les cafés naturels de haute qualité.",
+      "icon": "vineux.svg"
+    },
+    {
+      "slug": "fermente",
+      "name": "Fermenté",
+      "category": "Fermenté",
+      "description": "Arômes de fermentation contrôlée, apportant une complexité fruitée unique. Ces notes ajoutent une dimension expérimentale et moderne.",
+      "icon": "fermente.svg"
+    },
+    {
+      "slug": "vin-rouge",
+      "name": "Vin Rouge",
+      "category": "Fermenté",
+      "description": "Saveur évoquant le vin rouge avec ses tanins et sa complexité fruitée. Note très appréciée dans les cafés nature africains de spécialité.",
+      "icon": "vin-rouge.svg"
+    },
+    {
+      "slug": "rhum",
+      "name": "Rhum",
+      "category": "Fermenté",
+      "description": "Notes alcoolisées rappelant le rhum, apportant une richesse fermentée complexe. Arôme caractéristique de certains cafés anaérobiques.",
+      "icon": "rhum.svg"
+    },
+    {
+      "slug": "whisky",
+      "name": "Whisky",
+      "category": "Fermenté",
+      "description": "Arôme évoquant le whisky avec ses notes maltées et boisées. Cette note ajoute une profondeur alcoolisée sophistiquée sans alcool.",
+      "icon": "whisky.svg"
+    },
+    {
+      "slug": "cognac",
+      "name": "Cognac",
+      "category": "Fermenté",
+      "description": "Saveur raffinée rappelant le cognac, avec des notes fruitées et boisées fermentées. Arôme noble présent dans cafés vieillis exceptionnels.",
+      "icon": "cognac.svg"
     }
   ]
 }
