@@ -1,0 +1,214 @@
+{
+  "notes": [
+    {
+      "slug": "citrus",
+      "name": "Citrus",
+      "category": "Fruity",
+      "description": "Notes d'agrumes vives et acidulées rappelant le citron, l'orange, le pamplemousse ou la mandarine. Ces arômes apportent une fraîcheur et une vivacité caractéristiques.",
+      "icon": "citrus.svg"
+    },
+    {
+      "slug": "berry",
+      "name": "Berry",
+      "category": "Fruity",
+      "description": "Arômes de baies rouges et noires comme la framboise, la myrtille, la mûre ou la fraise. Ces notes fruitées ajoutent une douceur délicate et complexe.",
+      "icon": "berry.svg"
+    },
+    {
+      "slug": "stone-fruit",
+      "name": "Stone Fruit",
+      "category": "Fruity",
+      "description": "Saveurs de fruits à noyau tels que la pêche, l'abricot, la prune ou la nectarine. Ces arômes offrent une rondeur sucrée et juteuse.",
+      "icon": "stone-fruit.svg"
+    },
+    {
+      "slug": "tropical-fruit",
+      "name": "Tropical Fruit",
+      "category": "Fruity",
+      "description": "Notes exotiques évoquant la mangue, l'ananas, la papaye, le fruit de la passion ou la banane. Ces arômes apportent une dimension tropicale et ensoleillée.",
+      "icon": "tropical-fruit.svg"
+    },
+    {
+      "slug": "apple",
+      "name": "Apple",
+      "category": "Fruity",
+      "description": "Arômes de pomme fraîche ou cuite, pouvant rappeler la pomme verte acidulée ou la pomme rouge plus douce. Ces notes apportent une fraîcheur croquante.",
+      "icon": "apple.svg"
+    },
+    {
+      "slug": "grape",
+      "name": "Grape",
+      "category": "Fruity",
+      "description": "Saveurs rappelant le raisin frais ou le jus de raisin, parfois avec des notes de vin. Ces arômes ajoutent une complexité fruitée et légèrement vinifiée.",
+      "icon": "grape.svg"
+    },
+    {
+      "slug": "floral",
+      "name": "Floral",
+      "category": "Floral",
+      "description": "Notes florales générales évoquant un bouquet de fleurs fraîches. Ces arômes délicats apportent élégance et raffinement au café.",
+      "icon": "floral.svg"
+    },
+    {
+      "slug": "jasmine",
+      "name": "Jasmine",
+      "category": "Floral",
+      "description": "Arôme délicat et parfumé de jasmin, fleur blanche au parfum envoûtant. Cette note florale est souvent associée aux cafés éthiopiens et kenyans.",
+      "icon": "jasmine.svg"
+    },
+    {
+      "slug": "rose",
+      "name": "Rose",
+      "category": "Floral",
+      "description": "Notes subtiles de pétales de rose, apportant une touche romantique et délicate. Ces arômes sont particulièrement appréciés dans les cafés lavés d'altitude.",
+      "icon": "rose.svg"
+    },
+    {
+      "slug": "lavender",
+      "name": "Lavender",
+      "category": "Floral",
+      "description": "Parfum herbacé et floral de lavande, offrant une dimension aromatique unique et relaxante. Rare mais très apprécié des connaisseurs.",
+      "icon": "lavender.svg"
+    },
+    {
+      "slug": "chamomile",
+      "name": "Chamomile",
+      "category": "Floral",
+      "description": "Notes douces et apaisantes de camomille, rappelant les tisanes florales. Ces arômes ajoutent une rondeur délicate et réconfortante.",
+      "icon": "chamomile.svg"
+    },
+    {
+      "slug": "chocolate",
+      "name": "Chocolate",
+      "category": "Chocolatey",
+      "description": "Arômes généraux de chocolat, pouvant varier du chocolat au lait au chocolat noir. Ces notes sont très appréciées et courantes dans de nombreux cafés.",
+      "icon": "chocolate.svg"
+    },
+    {
+      "slug": "dark-chocolate",
+      "name": "Dark Chocolate",
+      "category": "Chocolatey",
+      "description": "Notes prononcées de chocolat noir intense, souvent avec une légère amertume agréable. Ces arômes apportent profondeur et caractère.",
+      "icon": "dark-chocolate.svg"
+    },
+    {
+      "slug": "cocoa",
+      "name": "Cocoa",
+      "category": "Chocolatey",
+      "description": "Saveur de cacao pur et de poudre de cacao, plus terreux et moins sucré que le chocolat. Ces notes ajoutent une dimension authentique et riche.",
+      "icon": "cocoa.svg"
+    },
+    {
+      "slug": "milk-chocolate",
+      "name": "Milk Chocolate",
+      "category": "Chocolatey",
+      "description": "Arômes doux et crémeux de chocolat au lait, plus sucrés et moins amers. Ces notes apportent rondeur et gourmandise.",
+      "icon": "milk-chocolate.svg"
+    },
+    {
+      "slug": "nutty",
+      "name": "Nutty",
+      "category": "Nutty",
+      "description": "Notes générales de fruits à coque grillés. Ces arômes ajoutent une dimension toastée et réconfortante au café.",
+      "icon": "nutty.svg"
+    },
+    {
+      "slug": "almond",
+      "name": "Almond",
+      "category": "Nutty",
+      "description": "Arômes d'amande douce ou grillée, apportant une élégance subtile. Ces notes sont particulièrement appréciées dans les cafés brésiliens.",
+      "icon": "almond.svg"
+    },
+    {
+      "slug": "hazelnut",
+      "name": "Hazelnut",
+      "category": "Nutty",
+      "description": "Saveur riche de noisette grillée, offrant une rondeur beurrée et gourmande. Très populaire et reconnaissable.",
+      "icon": "hazelnut.svg"
+    },
+    {
+      "slug": "peanut",
+      "name": "Peanut",
+      "category": "Nutty",
+      "description": "Notes de cacahuète grillée, apportant une dimension terreuse et légèrement salée. Moins raffiné mais très caractéristique.",
+      "icon": "peanut.svg"
+    },
+    {
+      "slug": "caramel",
+      "name": "Caramel",
+      "category": "Sweet",
+      "description": "Arômes de caramel doux et beurré, résultant souvent de la torréfaction. Ces notes apportent une gourmandise sucrée très appréciée.",
+      "icon": "caramel.svg"
+    },
+    {
+      "slug": "honey",
+      "name": "Honey",
+      "category": "Sweet",
+      "description": "Saveur douce et naturelle de miel, apportant une sucrosité délicate et florale. Souvent présent dans les cafés nature.",
+      "icon": "honey.svg"
+    },
+    {
+      "slug": "brown-sugar",
+      "name": "Brown Sugar",
+      "category": "Sweet",
+      "description": "Notes de sucre roux ou cassonade, avec des nuances de mélasse et de caramel léger. Ces arômes ajoutent une douceur complexe.",
+      "icon": "brown-sugar.svg"
+    },
+    {
+      "slug": "maple-syrup",
+      "name": "Maple Syrup",
+      "category": "Sweet",
+      "description": "Arômes de sirop d'érable, apportant une sucrosité riche et boisée. Note rare et très appréciée des amateurs.",
+      "icon": "maple-syrup.svg"
+    },
+    {
+      "slug": "vanilla",
+      "name": "Vanilla",
+      "category": "Sweet",
+      "description": "Notes crémeuses de vanille, offrant une douceur aromatique et raffinée. Ces arômes ajoutent de la rondeur et de l'élégance.",
+      "icon": "vanilla.svg"
+    },
+    {
+      "slug": "earthy",
+      "name": "Earthy",
+      "category": "Earthy",
+      "description": "Notes terreuses générales évoquant le sol humide, la mousse ou le sous-bois. Ces arômes apportent profondeur et caractère rustique.",
+      "icon": "earthy.svg"
+    },
+    {
+      "slug": "woody",
+      "name": "Woody",
+      "category": "Earthy",
+      "description": "Arômes de bois, de cèdre ou de chêne, apportant une dimension forestière. Ces notes ajoutent de la structure et de la complexité.",
+      "icon": "woody.svg"
+    },
+    {
+      "slug": "tobacco",
+      "name": "Tobacco",
+      "category": "Earthy",
+      "description": "Saveur de tabac séché, souvent présente dans les cafés vieillis ou très torréfiés. Note complexe appréciée des connaisseurs.",
+      "icon": "tobacco.svg"
+    },
+    {
+      "slug": "spicy",
+      "name": "Spicy",
+      "category": "Spicy",
+      "description": "Notes épicées générales pouvant évoquer diverses épices chaudes. Ces arômes ajoutent de la vivacité et de la complexité.",
+      "icon": "spicy.svg"
+    },
+    {
+      "slug": "cinnamon",
+      "name": "Cinnamon",
+      "category": "Spicy",
+      "description": "Arôme chaud et sucré de cannelle, apportant une dimension réconfortante. Souvent présent dans les cafés d'Amérique centrale.",
+      "icon": "cinnamon.svg"
+    },
+    {
+      "slug": "pepper",
+      "name": "Pepper",
+      "category": "Spicy",
+      "description": "Notes poivrées légèrement piquantes, ajoutant une vivacité épicée. Ces arômes sont caractéristiques de certains cafés africains.",
+      "icon": "pepper.svg"
+    }
+  ]
+}
